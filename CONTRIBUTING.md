@@ -82,7 +82,8 @@ For security reports, follow [`SECURITY.md`](SECURITY.md) instead.
 ## Code of conduct
 
 Be kind and constructive. Assume good faith, critique the code and not the
-person, and help newcomers.
+person, and help newcomers. See [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) for
+the full policy and how to report problems.
 
 ## License
 

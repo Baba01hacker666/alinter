@@ -96,7 +96,8 @@ The full manual lives in [`docs/`](docs/README.md):
 | [faq.md](docs/faq.md) | Common questions and troubleshooting |
 
 Contributors (and AI agents) should also read [`AGENTS.md`](AGENTS.md),
-[`CONTRIBUTING.md`](CONTRIBUTING.md) and [`SECURITY.md`](SECURITY.md).
+[`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md) and the
+[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
 
 ## Configuration
 

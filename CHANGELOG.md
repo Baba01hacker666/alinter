@@ -10,7 +10,10 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 - **Documentation**: a full manual under [`docs/`](docs/README.md) (how it
   works, configuration, rules, checks, presets, suppressions, plugins,
   reporters, CLI, Python API, development, FAQ), plus [`AGENTS.md`](AGENTS.md),
-  [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`SECURITY.md`](SECURITY.md).
+  [`CONTRIBUTING.md`](CONTRIBUTING.md), [`SECURITY.md`](SECURITY.md) and the
+  [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+- A tag-triggered release workflow that publishes to PyPI via Trusted
+  Publishing (`.github/workflows/release.yml`).
 - `ignore_fences` parameter for the `regex` and `literal` checks: matches
   inside fenced code blocks are skipped. The `markdown` preset now uses it so
   `# comment` lines inside code fences are no longer counted as headings.

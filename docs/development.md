@@ -122,13 +122,14 @@ pre-commit run --all-files
    git push origin main --tags
    ```
 
-4. Upload to PyPI:
+4. Pushing a `v*` tag runs `.github/workflows/release.yml`, which builds the
+   distributions and publishes them to PyPI via
+   [Trusted Publishing](https://docs.pypi.org/trusted-publishers/) (OIDC — no
+   API token). Configure the publisher once on PyPI: owner `Baba01hacker666`,
+   repository `alinter`, workflow `release.yml`, environment `pypi`.
 
-   ```bash
-   python -m twine upload dist/*
-   ```
-
-   (Or add a tag-triggered workflow using PyPI trusted publishing.)
+   To publish by hand instead, upload the artifacts yourself with
+   `python -m twine upload dist/*`.
 
 ## Style notes
 
