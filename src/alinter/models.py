@@ -6,7 +6,7 @@ import bisect
 import posixpath
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 
 class Severity(str, Enum):
@@ -18,7 +18,7 @@ class Severity(str, Enum):
     OFF = "off"
 
     @classmethod
-    def coerce(cls, value: Any) -> "Severity":
+    def coerce(cls, value: Any) -> Severity:
         if isinstance(value, Severity):
             return value
         if value is None:
@@ -82,7 +82,7 @@ class TextEdit:
     end: int
     replacement: str
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {"start": self.start, "end": self.end, "replacement": self.replacement}
 
 
@@ -92,27 +92,27 @@ class Rule:
 
     id: str
     type: str
-    message: Optional[str] = None
-    description: Optional[str] = None
+    message: str | None = None
+    description: str | None = None
     severity: Severity = Severity.ERROR
-    files: Tuple[str, ...] = ()
-    exclude: Tuple[str, ...] = ()
-    languages: Tuple[str, ...] = ()
+    files: tuple[str, ...] = ()
+    exclude: tuple[str, ...] = ()
+    languages: tuple[str, ...] = ()
     enabled: bool = True
-    tags: Tuple[str, ...] = ()
-    params: Dict[str, Any] = field(default_factory=dict)
-    source: Optional[str] = None
+    tags: tuple[str, ...] = ()
+    params: dict[str, Any] = field(default_factory=dict)
+    source: str | None = None
 
     def param(self, name: str, default: Any = None) -> Any:
         return self.params.get(name, default)
 
-    def scoped_to(self, rel_path: str, language: Optional[str]) -> bool:
+    def scoped_to(self, rel_path: str, language: str | None) -> bool:
         """Whether this *active* rule applies to a file."""
         if not self.enabled or not self.severity.is_active:
             return False
         return self.matches_path_language(rel_path, language)
 
-    def matches_path_language(self, rel_path: str, language: Optional[str]) -> bool:
+    def matches_path_language(self, rel_path: str, language: str | None) -> bool:
         """Whether this rule's file/language scope covers a file (ignoring on/off)."""
         from .utils import path_matches
 
@@ -127,7 +127,7 @@ class Rule:
                 return False
         return True
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "type": self.type,
@@ -150,14 +150,14 @@ class Violation:
     message: str
     path: str
     severity: Severity = Severity.ERROR
-    line: Optional[int] = None
-    column: Optional[int] = None
-    end_line: Optional[int] = None
-    end_column: Optional[int] = None
-    snippet: Optional[str] = None
-    fix: Optional[TextEdit] = None
-    tags: Tuple[str, ...] = ()
-    rule_type: Optional[str] = None
+    line: int | None = None
+    column: int | None = None
+    end_line: int | None = None
+    end_column: int | None = None
+    snippet: str | None = None
+    fix: TextEdit | None = None
+    tags: tuple[str, ...] = ()
+    rule_type: str | None = None
 
     @property
     def fixable(self) -> bool:
@@ -171,11 +171,11 @@ class Violation:
             return f"{self.path}:{self.line}"
         return f"{self.path}:{self.line}:{self.column}"
 
-    def sort_key(self) -> Tuple[str, int, int, str]:
+    def sort_key(self) -> tuple[str, int, int, str]:
         return (self.path, self.line or 0, self.column or 0, self.rule_id)
 
-    def as_dict(self) -> Dict[str, Any]:
-        data: Dict[str, Any] = {
+    def as_dict(self) -> dict[str, Any]:
+        data: dict[str, Any] = {
             "rule": self.rule_id,
             "message": self.message,
             "path": self.path,
@@ -208,10 +208,10 @@ class SourceFile:
     text: str
     encoding: str = "utf-8"
     has_bom: bool = False
-    language: Optional[str] = None
+    language: str | None = None
     size: int = 0
 
-    _line_starts: Optional[List[int]] = field(default=None, repr=False, compare=False)
+    _line_starts: list[int] | None = field(default=None, repr=False, compare=False)
 
     @property
     def filename(self) -> str:
@@ -222,22 +222,19 @@ class SourceFile:
         return posixpath.splitext(self.filename)[1].lower()
 
     @property
-    def lines(self) -> List[str]:
+    def lines(self) -> list[str]:
         """Lines *without* their terminators (a final empty line is dropped)."""
         return self.text.splitlines()
 
-    def split_lines_keepends(self) -> List[str]:
+    def split_lines_keepends(self) -> list[str]:
         return self.text.splitlines(keepends=True)
 
-    def _ensure_index(self) -> List[int]:
+    def _ensure_index(self) -> list[int]:
         if self._line_starts is None:
-            starts = [0]
-            for match in _NEWLINE_RE.finditer(self.text):
-                starts.append(match.end())
-            self._line_starts = starts
+            self._line_starts = [0, *[m.end() for m in _NEWLINE_RE.finditer(self.text)]]
         return self._line_starts
 
-    def line_col(self, offset: int) -> Tuple[int, int]:
+    def line_col(self, offset: int) -> tuple[int, int]:
         """Convert a character offset to 1-based ``(line, column)``."""
         starts = self._ensure_index()
         offset = max(0, min(offset, len(self.text)))
@@ -270,16 +267,16 @@ class RuleReport:
 class LintResult:
     """Everything produced by one engine run."""
 
-    violations: List[Violation] = field(default_factory=list)
+    violations: list[Violation] = field(default_factory=list)
     files_checked: int = 0
     files_skipped: int = 0
     rules_run: int = 0
-    fixed_files: List[str] = field(default_factory=list)
+    fixed_files: list[str] = field(default_factory=list)
     fixed_count: int = 0
-    errors: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
     duration: float = 0.0
 
-    def counts(self) -> Dict[str, int]:
+    def counts(self) -> dict[str, int]:
         counts = {"error": 0, "warning": 0, "info": 0}
         for violation in self.violations:
             counts[violation.severity.value] = counts.get(violation.severity.value, 0) + 1

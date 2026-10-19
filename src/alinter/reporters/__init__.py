@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Dict, Type
-
 from ..utils import ConfigError
 from .base import Reporter
 from .machine import GithubReporter, JsonReporter, JUnitReporter, SarifReporter
 from .text import TextReporter
 
-REPORTERS: Dict[str, Type[Reporter]] = {
+REPORTERS: dict[str, type[Reporter]] = {
     "text": TextReporter,
     "json": JsonReporter,
     "sarif": SarifReporter,
@@ -32,4 +30,4 @@ def reporter_names():
     return sorted(REPORTERS)
 
 
-__all__ = ["Reporter", "REPORTERS", "get_reporter", "reporter_names"]
+__all__ = ["REPORTERS", "Reporter", "get_reporter", "reporter_names"]

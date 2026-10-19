@@ -7,12 +7,13 @@ import os
 import posixpath
 import re
 import sys
+from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any
 
 try:  # PyYAML is a hard dependency, but keep the import defensive.
     import yaml
-except Exception:  # pragma: no cover - only if the environment is broken
+except ImportError:  # pragma: no cover - only if the environment is broken
     yaml = None  # type: ignore[assignment]
 
 if sys.version_info >= (3, 11):
@@ -20,7 +21,7 @@ if sys.version_info >= (3, 11):
 else:  # pragma: no cover - exercised on <3.11
     try:
         import tomli as _toml  # type: ignore[no-redef]
-    except Exception:
+    except ImportError:
         _toml = None  # type: ignore[assignment]
 
 
@@ -61,7 +62,7 @@ def parse_data(text: str, fmt: str, source: str = "<string>") -> Any:
             return _toml.loads(text)
     except ConfigError:
         raise
-    except Exception as exc:  # noqa: BLE001 - re-raised with context
+    except Exception as exc:
         raise ConfigError(f"could not parse {source} as {fmt}: {exc}") from exc
     raise ConfigError(f"unsupported format {fmt!r} for {source}")
 
@@ -86,7 +87,7 @@ def deep_merge(base: Any, override: Any) -> Any:
     Both inputs are treated as immutable.
     """
     if isinstance(base, dict) and isinstance(override, dict):
-        merged: Dict[Any, Any] = dict(base)
+        merged: dict[Any, Any] = dict(base)
         for key, value in override.items():
             if key in merged:
                 merged[key] = deep_merge(merged[key], value)
@@ -100,14 +101,14 @@ def deep_merge(base: Any, override: Any) -> Any:
 # Glob / path matching
 # ---------------------------------------------------------------------------
 
-_GLOB_CACHE: Dict[str, "re.Pattern[str]"] = {}
+_GLOB_CACHE: dict[str, re.Pattern[str]] = {}
 
 
 def _is_plain_name(pattern: str) -> bool:
     return "/" not in pattern and not any(ch in pattern for ch in "*?[")
 
 
-def glob_to_regex(pattern: str) -> "re.Pattern[str]":
+def glob_to_regex(pattern: str) -> re.Pattern[str]:
     """Compile a shell-style glob (with ``**`` support) to a regex.
 
     Matching is done against POSIX-style, root-relative paths. A pattern
@@ -136,7 +137,7 @@ def glob_to_regex(pattern: str) -> "re.Pattern[str]":
         # A pattern without a slash matches anywhere in the tree.
         pattern = "**/" + pattern
 
-    out: List[str] = ["^"]
+    out: list[str] = ["^"]
     i = 0
     n = len(pattern)
     while i < n:
@@ -198,10 +199,7 @@ def path_matches(path: str, patterns: Sequence[str]) -> bool:
     if not patterns:
         return False
     normalized = normalize_path(path)
-    for pattern in patterns:
-        if glob_to_regex(pattern).match(normalized):
-            return True
-    return False
+    return any(glob_to_regex(pattern).match(normalized) for pattern in patterns)
 
 
 def matches_any_name(path: str, names: Iterable[str]) -> bool:
@@ -220,12 +218,18 @@ BINARY_SNIFF = 8192
 
 
 def is_probably_binary(data: bytes) -> bool:
-    if b"\x00" in data[:BINARY_SNIFF]:
-        return True
-    return False
+    return b"\x00" in data[:BINARY_SNIFF]
 
 
-def detect_encoding(data: bytes, preferred: str = "utf-8") -> Tuple[str, bool]:
+def _decodes(data: bytes, encoding: str) -> bool:
+    try:
+        data.decode(encoding)
+    except (UnicodeDecodeError, LookupError):
+        return False
+    return True
+
+
+def detect_encoding(data: bytes, preferred: str = "utf-8") -> tuple[str, bool]:
     """Return ``(encoding, has_bom)`` for ``data``.
 
     Tries the preferred encoding, then ``utf-8-sig``, then common fallbacks.
@@ -234,15 +238,12 @@ def detect_encoding(data: bytes, preferred: str = "utf-8") -> Tuple[str, bool]:
     if data.startswith(b"\xef\xbb\xbf"):
         return "utf-8-sig", True
     for candidate in (preferred, "utf-8", "utf-16"):
-        try:
-            data.decode(candidate)
+        if _decodes(data, candidate):
             return candidate, False
-        except (UnicodeDecodeError, LookupError):
-            continue
     return "latin-1", False
 
 
-def read_text(path: Path, preferred: str = "utf-8") -> Tuple[str, str, bool]:
+def read_text(path: Path, preferred: str = "utf-8") -> tuple[str, str, bool]:
     """Read ``path`` returning ``(text, encoding, has_bom)``.
 
     Bytes are decoded leniently so linting never crashes on odd encodings.
@@ -275,7 +276,7 @@ class Color:
         "bright_blue": "\033[94m",
     }
 
-    def __init__(self, enabled: Optional[bool] = None) -> None:
+    def __init__(self, enabled: bool | None = None) -> None:
         if enabled is None:
             enabled = self._auto_enabled()
         self.enabled = enabled
@@ -288,7 +289,7 @@ class Color:
             return True
         try:
             return sys.stdout.isatty()
-        except Exception:  # pragma: no cover
+        except (AttributeError, OSError, ValueError):  # pragma: no cover
             return False
 
     def paint(self, text: str, *styles: str) -> str:
@@ -308,13 +309,13 @@ def truncate(text: str, limit: int = 120) -> str:
     return text[: max(0, limit - 1)] + "\u2026"
 
 
-def plural(count: int, singular: str, plural_form: Optional[str] = None) -> str:
+def plural(count: int, singular: str, plural_form: str | None = None) -> str:
     if count == 1:
         return f"{count} {singular}"
     return f"{count} {plural_form or singular + 's'}"
 
 
-def as_list(value: Any) -> List[Any]:
+def as_list(value: Any) -> list[Any]:
     """Coerce a scalar/mapping/list into a list."""
     if value is None:
         return []
@@ -323,7 +324,7 @@ def as_list(value: Any) -> List[Any]:
     return [value]
 
 
-def as_str_list(value: Any) -> List[str]:
+def as_str_list(value: Any) -> list[str]:
     return [str(item) for item in as_list(value)]
 
 

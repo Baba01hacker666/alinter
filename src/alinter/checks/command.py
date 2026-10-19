@@ -8,8 +8,8 @@ injects a ``_allow_commands`` parameter into the rule.
 from __future__ import annotations
 
 import os
-import subprocess
-from typing import Iterable
+import subprocess  # nosec B404
+from collections.abc import Iterable
 
 from ..models import SourceFile, Violation
 from ..utils import as_bool, truncate
@@ -47,9 +47,10 @@ class CommandCheck(Check):
         command = self._render(file)
         working_dir = os.path.dirname(file.path) or None
         try:
+            # Commands come from the user's own config; this check is opt-in.
             completed = subprocess.run(
                 command,
-                shell=self.shell,
+                shell=self.shell,  # nosec B602
                 capture_output=True,
                 text=True,
                 timeout=self.timeout,

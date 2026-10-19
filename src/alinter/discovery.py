@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Sequence
 
 from .utils import normalize_path, path_matches
 
 try:
     import pathspec  # type: ignore[import-not-found]
-except Exception:  # pragma: no cover - optional dependency
+except ImportError:  # pragma: no cover - optional dependency
     pathspec = None  # type: ignore[assignment]
 
 
@@ -23,15 +23,15 @@ class DiscoveredFile:
 
 @dataclass
 class DiscoveryResult:
-    files: List[DiscoveredFile] = field(default_factory=list)
-    missing: List[str] = field(default_factory=list)
+    files: list[DiscoveredFile] = field(default_factory=list)
+    missing: list[str] = field(default_factory=list)
     skipped: int = 0
 
 
-def _load_gitignore(cwd: str) -> Optional["pathspec.PathSpec"]:  # noqa: F821
+def _load_gitignore(cwd: str) -> pathspec.PathSpec | None:
     if pathspec is None:
         return None
-    patterns: List[str] = []
+    patterns: list[str] = []
     for name in (".gitignore", os.path.join(".git", "info", "exclude")):
         candidate = Path(cwd) / name
         if candidate.is_file():

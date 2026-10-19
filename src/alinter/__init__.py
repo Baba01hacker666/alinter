@@ -20,18 +20,18 @@ Or from the command line::
 from __future__ import annotations
 
 __all__ = [
-    "__version__",
-    "lint",
+    "Config",
     "Engine",
     "Rule",
-    "Violation",
     "Severity",
-    "Config",
+    "Violation",
+    "__version__",
+    "lint",
     "load_config",
 ]
 
 __version__ = "0.1.0"
 
+from .config import Config, load_config
 from .engine import Engine, lint
 from .models import Rule, Severity, Violation
-from .config import Config, load_config

@@ -8,13 +8,14 @@ produce auto-fixes.
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from ..models import SourceFile, TextEdit, Violation
 from ..utils import as_bool, as_list, truncate
 from .base import Check
 
-FLAG_NAMES: Dict[str, int] = {
+FLAG_NAMES: dict[str, int] = {
     "IGNORECASE": re.IGNORECASE, "I": re.IGNORECASE, "i": re.IGNORECASE,
     "MULTILINE": re.MULTILINE, "M": re.MULTILINE, "m": re.MULTILINE,
     "DOTALL": re.DOTALL, "S": re.DOTALL, "s": re.DOTALL,
@@ -61,7 +62,7 @@ class PatternCheck(Check):
 
     # -- configuration hooks ---------------------------------------------
 
-    def _compile(self) -> "re.Pattern[str]":  # pragma: no cover - overridden
+    def _compile(self) -> re.Pattern[str]:  # pragma: no cover - overridden
         raise NotImplementedError
 
     def _base_flags(self) -> int:
@@ -143,7 +144,7 @@ class RegexCheck(PatternCheck):
     kind = "pattern"
     help = "Search a file for a regular expression (forbidden/required/count)."
 
-    def _compile(self) -> "re.Pattern[str]":
+    def _compile(self) -> re.Pattern[str]:
         pattern = self.param("pattern")
         if pattern is None or pattern == "":
             raise ValueError(f"regex rule {self.rule.id!r} requires a 'pattern'")
@@ -165,7 +166,7 @@ class LiteralCheck(PatternCheck):
     kind = "value"
     help = "Search a file for a literal substring (forbidden/required/count)."
 
-    def _compile(self) -> "re.Pattern[str]":
+    def _compile(self) -> re.Pattern[str]:
         value = self.param("value")
         if value is None or value == "":
             raise ValueError(f"literal rule {self.rule.id!r} requires a 'value'")

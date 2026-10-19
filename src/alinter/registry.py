@@ -22,7 +22,8 @@ from __future__ import annotations
 import importlib
 import importlib.metadata as md
 import inspect
-from typing import Any, Dict, Iterable, Optional, Type
+from collections.abc import Iterable
+from typing import Any
 
 from .checks.base import Check
 from .utils import ConfigError, as_str_list
@@ -31,15 +32,15 @@ from .utils import ConfigError, as_str_list
 class CheckRegistry:
     """Holds the mapping of rule type name -> :class:`Check` subclass."""
 
-    def __init__(self, checks: Optional[Dict[str, Type[Check]]] = None) -> None:
-        self._checks: Dict[str, Type[Check]] = dict(checks or {})
+    def __init__(self, checks: dict[str, type[Check]] | None = None) -> None:
+        self._checks: dict[str, type[Check]] = dict(checks or {})
 
     # -- registration -----------------------------------------------------
 
-    def register(self, name: str, cls: Optional[Type[Check]] = None) -> Any:
+    def register(self, name: str, cls: type[Check] | None = None) -> Any:
         """Register ``cls`` under ``name``; usable as a decorator."""
         if cls is None:
-            def decorator(klass: Type[Check]) -> Type[Check]:
+            def decorator(klass: type[Check]) -> type[Check]:
                 self._checks[name] = klass
                 return klass
 
@@ -57,7 +58,7 @@ class CheckRegistry:
 
     # -- lookup -----------------------------------------------------------
 
-    def get(self, name: str) -> Optional[Type[Check]]:
+    def get(self, name: str) -> type[Check] | None:
         return self._checks.get(name)
 
     def names(self) -> Iterable[str]:
@@ -86,9 +87,10 @@ class CheckRegistry:
         except TypeError:  # Python 3.9 fallback
             entry_points = md.entry_points().get(group, [])  # type: ignore[union-attr]
         for entry_point in entry_points:
+            # A broken third-party plugin must never abort the whole run.
             try:
                 obj = entry_point.load()
-            except Exception:  # noqa: BLE001 - a broken plugin must not kill us
+            except Exception:  # noqa: BLE001  # nosec B112
                 continue
             try:
                 self.register_object(entry_point.name, obj)
@@ -128,7 +130,7 @@ class CheckRegistry:
             self.load_target(target)
 
 
-_REGISTRY: Optional[CheckRegistry] = None
+_REGISTRY: CheckRegistry | None = None
 
 
 def get_registry() -> CheckRegistry:

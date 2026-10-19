@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Iterable, Optional
+from collections.abc import Iterable
 
 from ..models import SourceFile, Violation
 from ..utils import as_bool, truncate
@@ -30,7 +30,7 @@ class MaxLineLengthCheck(Check):
         if self.length <= 0:
             raise ValueError(f"{rule.id!r}: 'length' must be positive")
         self.ignore_urls = as_bool(self.param("ignore_urls", False))
-        self.tab_width: Optional[int] = self.param("tab_width")
+        self.tab_width: int | None = self.param("tab_width")
         if self.tab_width is not None:
             self.tab_width = int(self.tab_width)
         ignore_regex = self.param("ignore_regex")

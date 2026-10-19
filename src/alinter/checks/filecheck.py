@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable, Optional
+from collections.abc import Iterable
 
 from ..models import SourceFile, TextEdit, Violation
 from ..utils import as_bool
@@ -119,7 +119,7 @@ class MaxLinesCheck(Check):
         self.maximum = int(maximum)
         self.count_blank = as_bool(self.param("count_blank", True))
         value = self.param("max_blank_lines")
-        self.max_blank_lines: Optional[int] = int(value) if value is not None else None
+        self.max_blank_lines: int | None = int(value) if value is not None else None
 
     def run(self, file: SourceFile) -> Iterable[Violation]:
         lines = file.lines

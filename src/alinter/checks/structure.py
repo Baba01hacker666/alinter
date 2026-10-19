@@ -4,8 +4,13 @@ from __future__ import annotations
 
 import configparser
 import json
-import xml.etree.ElementTree as ET
-from typing import Any, Iterable, Tuple
+from collections.abc import Iterable
+from typing import Any
+
+try:  # Prefer defusedxml: hardens XML parsing against entity-expansion attacks.
+    from defusedxml import ElementTree as _defused_etree  # type: ignore[import-not-found]
+except ImportError:  # pragma: no cover - stdlib fallback for trusted local files
+    from xml.etree import ElementTree as _defused_etree  # nosec B405
 
 from ..models import SourceFile, Violation
 from ..utils import as_str_list, have_yaml, parse_data
@@ -19,8 +24,9 @@ def _parse_ini(text: str) -> Any:
 
 
 def _parse_xml(text: str) -> Any:
-    root = ET.fromstring(text)
-    return root
+    # defusedxml is preferred (see import above); the stdlib fallback only ever
+    # parses the user's own project files, which are trusted input.
+    return _defused_etree.fromstring(text)  # nosec B314
 
 
 def _parse_structure(text: str, fmt: str) -> Any:
@@ -40,7 +46,7 @@ def _parse_structure(text: str, fmt: str) -> Any:
     raise ValueError(f"unsupported structure format {fmt!r}")
 
 
-def _lookup(data: Any, path: str) -> Tuple[bool, Any]:
+def _lookup(data: Any, path: str) -> tuple[bool, Any]:
     """Resolve a dotted path; list indices are written as integers (``a.0.b``)."""
     current = data
     for part in path.split("."):

@@ -6,9 +6,10 @@ import dataclasses
 import fnmatch
 import os
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
+from typing import Any
 
 from .config import Config, default_user_preset_dirs, load_config
 from .discovery import discover
@@ -31,26 +32,26 @@ from .utils import (
 class Options:
     """Runtime options for a lint run (mostly populated by the CLI)."""
 
-    paths: List[str] = field(default_factory=list)
+    paths: list[str] = field(default_factory=list)
     cwd: str = "."
-    config: Optional[str] = None
+    config: str | None = None
     no_config: bool = False
     fix: bool = False
     fix_dry_run: bool = False
     format: str = "text"
     severity: Severity = Severity.INFO
     fail_on: Severity = Severity.ERROR
-    select: Tuple[str, ...] = ()
-    ignore: Tuple[str, ...] = ()
-    include: Tuple[str, ...] = ()
-    exclude: Tuple[str, ...] = ()
+    select: tuple[str, ...] = ()
+    ignore: tuple[str, ...] = ()
+    include: tuple[str, ...] = ()
+    exclude: tuple[str, ...] = ()
     jobs: int = 0
-    stdin_text: Optional[str] = None
+    stdin_text: str | None = None
     stdin_filename: str = "<stdin>"
     max_iterations: int = 10
-    allow_commands: Optional[bool] = None
-    use_gitignore: Optional[bool] = None
-    color: Optional[bool] = None
+    allow_commands: bool | None = None
+    use_gitignore: bool | None = None
+    color: bool | None = None
     quiet: bool = False
     verbose: int = 0
 
@@ -65,8 +66,8 @@ class Engine:
     def __init__(
         self,
         config: Config,
-        options: Optional[Options] = None,
-        registry: Optional[CheckRegistry] = None,
+        options: Options | None = None,
+        registry: CheckRegistry | None = None,
     ) -> None:
         self.config = config
         self.options = options or Options()
@@ -80,16 +81,16 @@ class Engine:
         self._preset_sources = {
             preset.source for preset in self.presets.presets.values()
         }
-        self._preset_rule_cache: Dict[str, List[Rule]] = {}
-        self._combined_cache: Dict[str, Dict[str, Rule]] = {}
-        self._check_cache: Dict[str, Any] = {}
-        self._reported_errors: Set[str] = set()
-        self._rules_run: Set[str] = set()
-        self._errors: List[str] = []
+        self._preset_rule_cache: dict[str, list[Rule]] = {}
+        self._combined_cache: dict[str, dict[str, Rule]] = {}
+        self._check_cache: dict[str, Any] = {}
+        self._reported_errors: set[str] = set()
+        self._rules_run: set[str] = set()
+        self._errors: list[str] = []
 
     # -- setup ------------------------------------------------------------
 
-    def _preset_dirs(self) -> List[str]:
+    def _preset_dirs(self) -> list[str]:
         dirs = list(self.config.preset_paths)
         dirs.extend(default_user_preset_dirs())
         return [d for d in dirs if d]
@@ -104,30 +105,32 @@ class Engine:
         ignore = tuple(self.config.ignore) + tuple(self.options.ignore)
         if select and not _matches_patterns(rule_id, select):
             return False
-        if ignore and _matches_patterns(rule_id, ignore):
-            return False
-        return True
+        return not (ignore and _matches_patterns(rule_id, ignore))
 
     # -- rule selection ---------------------------------------------------
 
-    def preset_rules(self, language: Optional[str]) -> List[Rule]:
+    def preset_rules(self, language: str | None) -> list[Rule]:
         key = language or ""
         cached = self._preset_rule_cache.get(key)
         if cached is not None:
             return cached
 
-        names: List[str] = []
+        names: list[str] = []
         for name in self.config.extends:
             if name not in names:
                 names.append(name)
-        if self.config.auto_detect and language:
-            if language in self.presets.presets and language not in names:
-                names.append(language)
+        if (
+            self.config.auto_detect
+            and language
+            and language in self.presets.presets
+            and language not in names
+        ):
+            names.append(language)
         for name in self.presets.names():
             if self.presets.presets[name].always_apply and name not in names:
                 names.append(name)
 
-        rules: List[Rule] = []
+        rules: list[Rule] = []
         for name in names:
             preset = self.presets.get(name)
             if preset is None:
@@ -141,11 +144,11 @@ class Engine:
         return rules
 
     def _rules_for(
-        self, rel_path: str, language: Optional[str], include_disabled: bool = False
-    ) -> List[Rule]:
+        self, rel_path: str, language: str | None, include_disabled: bool = False
+    ) -> list[Rule]:
         combined = self._combined_rules(language)
 
-        selected: List[Rule] = []
+        selected: list[Rule] = []
         for rule in combined.values():
             if not self._enabled(rule.id):
                 continue
@@ -159,14 +162,14 @@ class Engine:
             return selected
         return self._apply_singletons(selected)
 
-    def _combined_rules(self, language: Optional[str]) -> Dict[str, Rule]:
+    def _combined_rules(self, language: str | None) -> dict[str, Rule]:
         """Preset rules + user rules + user overrides, keyed by rule id."""
         key = language or ""
         cached = self._combined_cache.get(key)
         if cached is not None:
             return cached
 
-        combined: Dict[str, Rule] = {}
+        combined: dict[str, Rule] = {}
         for rule in self.preset_rules(language):
             combined[rule.id] = rule
         for rule in self.config.rules:
@@ -184,7 +187,7 @@ class Engine:
         self._combined_cache[key] = combined
         return combined
 
-    def _apply_override(self, base: Rule, patch: Dict[str, Any]) -> Rule:
+    def _apply_override(self, base: Rule, patch: dict[str, Any]) -> Rule:
         params = dict(base.params)
         for key, value in patch.items():
             if key in ("type", "check", "severity", "level", "message", "description",
@@ -217,10 +220,10 @@ class Engine:
             return 1
         return 2  # user-defined
 
-    def _apply_singletons(self, rules: List[Rule]) -> List[Rule]:
+    def _apply_singletons(self, rules: list[Rule]) -> list[Rule]:
         """Keep only the most specific rule per singleton check type."""
-        best: Dict[str, Rule] = {}
-        passthrough: List[Rule] = []
+        best: dict[str, Rule] = {}
+        passthrough: list[Rule] = []
         for rule in rules:
             check_cls = self.registry.get(rule.type)
             if check_cls is not None and getattr(check_cls, "singleton", False):
@@ -255,7 +258,7 @@ class Engine:
 
     # -- source loading ---------------------------------------------------
 
-    def _detect_language(self, filename: str, first_line: Optional[str]) -> Optional[str]:
+    def _detect_language(self, filename: str, first_line: str | None) -> str | None:
         extension = os.path.splitext(filename)[1].lower()
         return self.presets.index.detect(filename, extension, first_line)
 
@@ -270,7 +273,7 @@ class Engine:
             size=len(text.encode("utf-8", errors="replace")),
         )
 
-    def _load_source(self, path: str, rel_path: str) -> Optional[SourceFile]:
+    def _load_source(self, path: str, rel_path: str) -> SourceFile | None:
         try:
             data = Path(path).read_bytes()
         except OSError as exc:
@@ -310,8 +313,8 @@ class Engine:
 
     # -- linting ----------------------------------------------------------
 
-    def _lint_source(self, source: SourceFile, suppressions: Suppressions) -> List[Violation]:
-        violations: List[Violation] = []
+    def _lint_source(self, source: SourceFile, suppressions: Suppressions) -> list[Violation]:
+        violations: list[Violation] = []
         for rule in self._rules_for(source.rel_path, source.language):
             check = self._get_check(rule)
             if check is None:
@@ -332,9 +335,9 @@ class Engine:
 
     def _lint_all(
         self, sources: Sequence[SourceFile]
-    ) -> Tuple[List[Violation], Dict[str, List[TextEdit]]]:
-        violations: List[Violation] = []
-        edits: Dict[str, List[TextEdit]] = {}
+    ) -> tuple[list[Violation], dict[str, list[TextEdit]]]:
+        violations: list[Violation] = []
+        edits: dict[str, list[TextEdit]] = {}
         for source in sources:
             suppressions = parse_suppressions(source.text)
             for violation in self._lint_source(source, suppressions):
@@ -345,7 +348,7 @@ class Engine:
 
     # -- planning ---------------------------------------------------------
 
-    def active_rules(self, include_disabled: bool = False) -> Dict[str, Dict[str, Any]]:
+    def active_rules(self, include_disabled: bool = False) -> dict[str, dict[str, Any]]:
         """Return ``rule_id -> info`` for the currently discovered files."""
         use_gitignore = self.options.use_gitignore
         if use_gitignore is None:
@@ -357,8 +360,8 @@ class Engine:
             exclude=tuple(self.config.excludes()) + tuple(self.options.exclude),
             use_gitignore=bool(use_gitignore),
         )
-        active: Dict[str, Dict[str, Any]] = {}
-        languages: Set[str] = set()
+        active: dict[str, dict[str, Any]] = {}
+        languages: set[str] = set()
         for item in discovery.files:
             source = self._load_source(item.path, item.rel_path)
             if source is None:
@@ -386,10 +389,10 @@ class Engine:
 
     def run(self) -> LintResult:
         started = time.perf_counter()
-        self._errors: List[str] = []
+        self._errors: list[str] = []
         result = LintResult()
 
-        sources: List[SourceFile] = []
+        sources: list[SourceFile] = []
         if self.options.stdin_text is not None:
             sources.append(
                 self._source_from_text(self.options.stdin_text, self.options.stdin_filename)
@@ -435,7 +438,7 @@ class Engine:
         result.duration = time.perf_counter() - started
         return result
 
-    def _fix_loop(self, sources: List[SourceFile], result: LintResult) -> None:
+    def _fix_loop(self, sources: list[SourceFile], result: LintResult) -> None:
         dry_run = self.options.fix_dry_run
         for _ in range(max(1, self.options.max_iterations)):
             _, edits = self._lint_all(sources)
@@ -468,9 +471,9 @@ class Engine:
 
 
 def lint(
-    paths: Optional[Sequence[str]] = None,
+    paths: Sequence[str] | None = None,
     *,
-    config: Optional[Any] = None,
+    config: Any | None = None,
     cwd: str = ".",
     **kwargs: Any,
 ) -> LintResult:

@@ -5,8 +5,6 @@ Maps rule ``type`` names (and a few friendly aliases) to check classes.
 
 from __future__ import annotations
 
-from typing import Dict, Type
-
 from .base import Check
 from .command import CommandCheck
 from .filecheck import (
@@ -22,7 +20,7 @@ from .pattern import LiteralCheck, RegexCheck
 from .structure import StructureCheck
 from .whitespace import NoTabsCheck, TrailingWhitespaceCheck
 
-BUILTIN_CHECKS: Dict[str, Type[Check]] = {
+BUILTIN_CHECKS: dict[str, type[Check]] = {
     # Canonical names -----------------------------------------------------
     "regex": RegexCheck,
     "literal": LiteralCheck,

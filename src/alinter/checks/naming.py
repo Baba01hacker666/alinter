@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from typing import Iterable
+from collections.abc import Iterable
 
 from ..models import SourceFile, Violation
 from ..utils import as_str_list
@@ -34,12 +34,7 @@ class FilenameCheck(Check):
     def run(self, file: SourceFile) -> Iterable[Violation]:
         if self.pattern is not None:
             found = self.pattern.search(file.filename) is not None
-            if self.mode == "forbidden" and found:
-                yield self.violation(
-                    file, line=1, column=1,
-                    message=self.message(name=file.filename),
-                )
-            elif self.mode == "required" and not found:
+            if (self.mode == "forbidden" and found) or (self.mode == "required" and not found):
                 yield self.violation(
                     file, line=1, column=1,
                     message=self.message(name=file.filename),

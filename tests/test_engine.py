@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from alinter.engine import Engine, Options
 from alinter.config import load_config
+from alinter.engine import Engine, Options
 from alinter.models import Severity
 
 BASIC = """

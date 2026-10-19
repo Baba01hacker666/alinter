@@ -42,7 +42,15 @@ dependencies = [
 
 [project.optional-dependencies]
 gitignore = ["pathspec>=0.11"]
-dev = ["pytest>=7.0", "build>=1.0", "pyflakes>=3.0"]
+xml = ["defusedxml>=0.7"]
+dev = [
+  "pytest>=7.0",
+  "build>=1.0",
+  "pyflakes>=3.0",
+  "ruff>=0.6",
+  "bandit>=1.7",
+  "defusedxml>=0.7",
+]
 
 [project.scripts]
 alinter = "alinter.cli:main"
@@ -74,3 +82,47 @@ include = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+src = ["src", "tests", "examples"]
+exclude = [".venv", "dist", "build", ".git"]
+
+[tool.ruff.lint]
+select = [
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # pyflakes
+  "I",    # import sorting
+  "UP",   # pyupgrade
+  "B",    # flake8-bugbear
+  "C4",   # comprehensions
+  "SIM",  # simplify
+  "RUF",  # ruff-specific
+  "PIE",  # flake8-pie
+  "PERF", # perflint
+  "BLE",  # flake8-blind-except
+]
+ignore = [
+  "E501",    # line length is enforced by alinter itself (python/max-line-length)
+  "RUF012",  # mutable class attributes are intentional (class-level defaults)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+  "BLE001",  # tests deliberately exercise failure paths
+  "SIM117",  # nested with-statements read better in some tests
+  "B011",    # assert False is fine in tests
+]
+"examples/**" = ["BLE001"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["alinter"]
+
+[tool.bandit]
+targets = ["src/alinter"]
+exclude_dirs = ["tests", ".venv", "dist", "build"]
+# Intentional `# nosec` sites in the source document why subprocess/XML usage is
+# safe; no blanket skips are needed here.
+

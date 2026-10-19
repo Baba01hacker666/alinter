@@ -1,0 +1,44 @@
+# Developer hooks for contributing to alinter.
+# Enable once with `pre-commit install`; run everywhere with `pre-commit run --all-files`.
+#
+# Tool versions come from the project's `[dev]` extra so hooks and CI agree.
+default_language_version:
+  python: python3
+
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff
+        description: Lint with ruff (formatting, imports, bugbear, pyupgrade)
+        entry: ruff check --force-exclude --fix
+        language: python
+        additional_dependencies: ["ruff>=0.6"]
+        types_or: [python, pyi]
+        require_serial: true
+
+      - id: bandit
+        name: bandit
+        description: Security scan with bandit
+        entry: bandit -c pyproject.toml -r src/alinter
+        language: python
+        additional_dependencies: ["bandit>=1.7"]
+        pass_filenames: false
+        require_serial: true
+
+      - id: pyflakes
+        name: pyflakes
+        description: Undefined names and unused imports
+        entry: pyflakes
+        language: python
+        additional_dependencies: ["pyflakes>=3.0"]
+        types: [python]
+        require_serial: true
+
+      - id: alinter
+        name: alinter
+        description: Lint the linter with itself
+        entry: alinter check
+        language: system
+        pass_filenames: false
+        always_run: true

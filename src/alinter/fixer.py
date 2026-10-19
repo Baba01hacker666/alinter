@@ -2,20 +2,20 @@
 
 from __future__ import annotations
 
-from typing import Iterable, List, Tuple
+from collections.abc import Iterable
 
 from .models import TextEdit
 
 
-def apply_edits(text: str, edits: Iterable[TextEdit]) -> Tuple[str, int]:
+def apply_edits(text: str, edits: Iterable[TextEdit]) -> tuple[str, int]:
     """Apply ``edits`` to ``text``, skipping overlapping ones.
 
     Returns ``(new_text, applied_count)``. Edits are applied left to right;
     an edit that starts before the previous edit finished is dropped (the fix
     loop will pick it up on the next pass).
     """
-    ordered: List[TextEdit] = sorted(edits, key=lambda edit: (edit.start, edit.end))
-    pieces: List[str] = []
+    ordered: list[TextEdit] = sorted(edits, key=lambda edit: (edit.start, edit.end))
+    pieces: list[str] = []
     position = 0
     applied = 0
     length = len(text)

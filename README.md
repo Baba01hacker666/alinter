@@ -20,7 +20,18 @@ pip install alinter
 ```
 
 alinter needs Python 3.9+ and depends only on PyYAML (plus `tomli` on older
-Pythons).
+Pythons). Install the optional `xml` extra to harden XML parsing with
+[`defusedxml`](https://pypi.org/project/defusedxml/):
+
+```bash
+pip install "alinter[xml]"
+```
+
+Install the `gitignore` extra for `.gitignore`-aware discovery:
+
+```bash
+pip install "alinter[gitignore]"
+```
 
 ### As a pre-commit hook
 
@@ -248,6 +259,28 @@ Useful flags: `--config`, `--no-config`, `--format`, `--fix`, `--fix-dry-run`,
 
 Exit codes: `0` clean, `1` violations at or above `--fail-on` (default
 `error`), `2` configuration error.
+
+## Development
+
+```bash
+git clone https://github.com/Baba01hacker666/alinter
+cd alinter
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+Quality gates (also run in CI):
+
+```bash
+ruff check src tests examples          # formatting, imports, bugbear, pyupgrade
+bandit -c pyproject.toml -r src/alinter  # security (flake8-bandit rules)
+pyflakes src/alinter tests examples    # undefined names / unused imports
+alinter check src tests examples       # the linter lints itself
+python -m pytest -q                    # test suite
+```
+
+Ruff and bandit are configured in `pyproject.toml`. A `.pre-commit-config.yaml`
+is provided; run `pre-commit install` to enable the hooks locally.
 
 ## License
 

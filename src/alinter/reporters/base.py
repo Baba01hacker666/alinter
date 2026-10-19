@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import sys
-from typing import Any, Dict, List, Optional, Sequence, TextIO
+from collections.abc import Sequence
+from typing import Any, TextIO
 
 from ..models import LintResult, Severity, Violation
 
@@ -22,21 +23,21 @@ class Reporter:
         *,
         config: Any = None,
         options: Any = None,
-        out: Optional[TextIO] = None,
+        out: TextIO | None = None,
     ) -> str:
         raise NotImplementedError
 
     # -- helpers ----------------------------------------------------------
 
     @staticmethod
-    def group_by_file(violations: Sequence[Violation]) -> "Dict[str, List[Violation]]":
-        grouped: Dict[str, List[Violation]] = {}
+    def group_by_file(violations: Sequence[Violation]) -> dict[str, list[Violation]]:
+        grouped: dict[str, list[Violation]] = {}
         for violation in violations:
             grouped.setdefault(violation.path, []).append(violation)
         return grouped
 
     @staticmethod
-    def write(text: str, out: Optional[TextIO]) -> str:
+    def write(text: str, out: TextIO | None) -> str:
         stream = out if out is not None else sys.stdout
         stream.write(text)
         if text and not text.endswith("\n"):
@@ -44,7 +45,7 @@ class Reporter:
         return text
 
 
-def summarize(result: LintResult) -> Dict[str, Any]:
+def summarize(result: LintResult) -> dict[str, Any]:
     counts = result.counts()
     return {
         "files": result.files_checked,

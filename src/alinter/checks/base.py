@@ -11,7 +11,8 @@ the ``alinter.checks`` entry-point group (see :mod:`alinter.registry`).
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Optional
+from collections.abc import Iterable
+from typing import Any
 
 from ..models import Rule, SourceFile, TextEdit, Violation
 
@@ -34,7 +35,7 @@ class Check:
 
     def __init__(self, rule: Rule) -> None:
         self.rule = rule
-        self.params: Dict[str, Any] = rule.params
+        self.params: dict[str, Any] = rule.params
 
     # -- helpers ----------------------------------------------------------
 
@@ -48,7 +49,7 @@ class Check:
         here. Unknown placeholders degrade gracefully to the raw template.
         """
         template = self.rule.message or self.default_message or self.name
-        data: Dict[str, Any] = {"rule": self.rule.id}
+        data: dict[str, Any] = {"rule": self.rule.id}
         data.update(self.params)
         data.update(extra)
         try:
@@ -60,13 +61,13 @@ class Check:
         self,
         file: SourceFile,
         *,
-        line: Optional[int] = None,
-        column: Optional[int] = None,
-        end_line: Optional[int] = None,
-        end_column: Optional[int] = None,
-        message: Optional[str] = None,
-        snippet: Optional[str] = None,
-        fix: Optional[TextEdit] = None,
+        line: int | None = None,
+        column: int | None = None,
+        end_line: int | None = None,
+        end_column: int | None = None,
+        message: str | None = None,
+        snippet: str | None = None,
+        fix: TextEdit | None = None,
         **extra: Any,
     ) -> Violation:
         return Violation(
@@ -90,7 +91,7 @@ class Check:
         raise NotImplementedError
 
 
-def location_of(file: SourceFile, start: int, end: Optional[int] = None):
+def location_of(file: SourceFile, start: int, end: int | None = None):
     """Return ``(line, column, end_line, end_column)`` for a span."""
     line, column = file.line_col(start)
     if end is None:

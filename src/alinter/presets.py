@@ -12,9 +12,10 @@ preset file and it is picked up automatically.
 from __future__ import annotations
 
 import os
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any
 
 from .config import build_rule
 from .models import Rule, Severity
@@ -22,7 +23,7 @@ from .utils import ConfigError, as_bool, as_str_list, format_for_path, parse_dat
 
 try:  # pragma: no cover - importlib.resources always present on 3.9+
     from importlib import resources as _resources
-except Exception:  # pragma: no cover
+except ImportError:  # pragma: no cover
     _resources = None  # type: ignore[assignment]
 
 
@@ -34,31 +35,31 @@ class Preset:
     language: str
     description: str = ""
     always_apply: bool = False
-    detect: Dict[str, List[str]] = field(default_factory=dict)
-    raw_rules: List[Dict[str, Any]] = field(default_factory=list)
-    raw: Dict[str, Any] = field(default_factory=dict)
+    detect: dict[str, list[str]] = field(default_factory=dict)
+    raw_rules: list[dict[str, Any]] = field(default_factory=list)
+    raw: dict[str, Any] = field(default_factory=dict)
     source: str = "<builtin>"
 
     @property
-    def extensions(self) -> List[str]:
+    def extensions(self) -> list[str]:
         return [str(ext).lower() for ext in self.detect.get("extensions", [])]
 
     @property
-    def filenames(self) -> List[str]:
+    def filenames(self) -> list[str]:
         return [str(name) for name in self.detect.get("filenames", [])]
 
     @property
-    def shebangs(self) -> List[str]:
+    def shebangs(self) -> list[str]:
         return [str(token).lower() for token in self.detect.get("shebangs", [])]
 
-    def build_rules(self) -> List[Rule]:
+    def build_rules(self) -> list[Rule]:
         """Build rules, scoping them to this preset's language.
 
         Preset rules are matched by *detected language* rather than by file
         glob, so detection via extension, file name or shebang all work. A
         rule may still set its own ``files``/``languages`` to narrow further.
         """
-        rules: List[Rule] = []
+        rules: list[Rule] = []
         for entry in self.raw_rules:
             rule = build_rule(
                 entry, source=self.source, default_severity=Severity.WARNING
@@ -69,7 +70,7 @@ class Preset:
         return rules
 
 
-def _preset_from_data(data: Any, name: Optional[str], source: str) -> Preset:
+def _preset_from_data(data: Any, name: str | None, source: str) -> Preset:
     if not isinstance(data, dict):
         raise ConfigError(f"preset {source} must contain a mapping")
     preset_name = str(data.get("name") or name or "").strip()
@@ -103,16 +104,16 @@ def _preset_from_data(data: Any, name: Optional[str], source: str) -> Preset:
 
 @dataclass
 class DetectionIndex:
-    extensions: Dict[str, List[str]] = field(default_factory=dict)
-    filenames: Dict[str, List[str]] = field(default_factory=dict)
-    shebangs: Dict[str, List[str]] = field(default_factory=dict)
+    extensions: dict[str, list[str]] = field(default_factory=dict)
+    filenames: dict[str, list[str]] = field(default_factory=dict)
+    shebangs: dict[str, list[str]] = field(default_factory=dict)
 
     def detect(
         self,
         filename: str,
         extension: str,
-        first_line: Optional[str] = None,
-    ) -> Optional[str]:
+        first_line: str | None = None,
+    ) -> str | None:
         for candidate in (filename, filename.lower()):
             if candidate in self.filenames:
                 return self.filenames[candidate][0]
@@ -126,8 +127,8 @@ class DetectionIndex:
         return None
 
 
-def _shebang_tokens(line: str) -> List[str]:
-    tokens: List[str] = []
+def _shebang_tokens(line: str) -> list[str]:
+    tokens: list[str] = []
     for word in line[2:].replace("\t", " ").split():
         word = word.strip()
         if not word:
@@ -153,8 +154,8 @@ class PresetRepository:
     """Loads every preset from bundled resources and user directories."""
 
     def __init__(self, extra_dirs: Sequence[str] = ()) -> None:
-        self.presets: Dict[str, Preset] = {}
-        self.errors: List[str] = []
+        self.presets: dict[str, Preset] = {}
+        self.errors: list[str] = []
         self._load_builtin()
         for directory in extra_dirs:
             self.load_dir(directory)
@@ -198,7 +199,7 @@ class PresetRepository:
 
     # -- access -----------------------------------------------------------
 
-    def get(self, name: str) -> Optional[Preset]:
+    def get(self, name: str) -> Preset | None:
         return self.presets.get(name)
 
     def require(self, name: str) -> Preset:
@@ -208,7 +209,7 @@ class PresetRepository:
             raise ConfigError(f"unknown preset {name!r}. Available: {available}")
         return preset
 
-    def names(self) -> List[str]:
+    def names(self) -> list[str]:
         return sorted(self.presets)
 
     def _build_index(self) -> DetectionIndex:

@@ -15,9 +15,10 @@ support for any language or any bespoke check without touching the engine.
 from __future__ import annotations
 
 import os
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any
 
 from .models import RULE_RESERVED_KEYS, Rule, Severity
 from .utils import (
@@ -41,7 +42,7 @@ CONFIG_FILENAMES = (
 )
 
 #: Directories/files skipped by default when walking the tree.
-DEFAULT_EXCLUDES: Tuple[str, ...] = (
+DEFAULT_EXCLUDES: tuple[str, ...] = (
     "**/.git/**",
     "**/.hg/**",
     "**/.svn/**",
@@ -71,7 +72,7 @@ DEFAULT_EXCLUDES: Tuple[str, ...] = (
     "**/.DS_Store",
 )
 
-DEFAULT_SETTINGS: Dict[str, Any] = {
+DEFAULT_SETTINGS: dict[str, Any] = {
     "encoding": "utf-8",
     "max_file_size": 5_000_000,
     "follow_symlinks": False,
@@ -100,21 +101,21 @@ class Config:
     """A fully resolved alinter configuration."""
 
     version: int = 1
-    path: Optional[str] = None
+    path: str | None = None
     root: str = "."
-    sources: List[str] = field(default_factory=list)
+    sources: list[str] = field(default_factory=list)
     auto_detect: bool = True
-    extends: Tuple[str, ...] = ()
-    include: Tuple[str, ...] = ()
-    exclude: Tuple[str, ...] = ()
-    ignore: Tuple[str, ...] = ()
-    select: Tuple[str, ...] = ()
-    plugins: Tuple[str, ...] = ()
-    preset_paths: Tuple[str, ...] = ()
-    settings: Dict[str, Any] = field(default_factory=dict)
-    rules: List[Rule] = field(default_factory=list)
-    overrides: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    raw: Dict[str, Any] = field(default_factory=dict)
+    extends: tuple[str, ...] = ()
+    include: tuple[str, ...] = ()
+    exclude: tuple[str, ...] = ()
+    ignore: tuple[str, ...] = ()
+    select: tuple[str, ...] = ()
+    plugins: tuple[str, ...] = ()
+    preset_paths: tuple[str, ...] = ()
+    settings: dict[str, Any] = field(default_factory=dict)
+    rules: list[Rule] = field(default_factory=list)
+    overrides: dict[str, dict[str, Any]] = field(default_factory=dict)
+    raw: dict[str, Any] = field(default_factory=dict)
 
     # -- convenience ------------------------------------------------------
 
@@ -123,17 +124,17 @@ class Config:
             return self.settings[name]
         return DEFAULT_SETTINGS.get(name, default)
 
-    def excludes(self) -> List[str]:
-        patterns: List[str] = []
+    def excludes(self) -> list[str]:
+        patterns: list[str] = []
         if as_bool(self.setting("exclude_defaults", True)):
             patterns.extend(DEFAULT_EXCLUDES)
         patterns.extend(self.exclude)
         return patterns
 
-    def rule_ids(self) -> List[str]:
+    def rule_ids(self) -> list[str]:
         return [rule.id for rule in self.rules]
 
-    def find_rule(self, rule_id: str) -> Optional[Rule]:
+    def find_rule(self, rule_id: str) -> Rule | None:
         for rule in self.rules:
             if rule.id == rule_id:
                 return rule
@@ -147,7 +148,7 @@ class Config:
 def build_rule(
     entry: Any,
     *,
-    source: Optional[str] = None,
+    source: str | None = None,
     default_severity: Severity = Severity.ERROR,
 ) -> Rule:
     """Build a :class:`Rule` from a config mapping."""
@@ -170,7 +171,7 @@ def build_rule(
     rule_type = str(rule_type).strip().lower()
 
     severity = Severity.coerce(entry.get("severity", entry.get("level", default_severity)))
-    params: Dict[str, Any] = {
+    params: dict[str, Any] = {
         key: value for key, value in entry.items() if key not in RULE_RESERVED_KEYS
     }
     nested = entry.get("params")
@@ -208,7 +209,7 @@ def _has_tool_alinter(path: Path) -> bool:
     return marker in text
 
 
-def find_config_file(start: str) -> Optional[Path]:
+def find_config_file(start: str) -> Path | None:
     """Walk up from ``start`` looking for a config file."""
     directory = Path(start).resolve()
     if directory.is_file():
@@ -224,7 +225,7 @@ def find_config_file(start: str) -> Optional[Path]:
     return None
 
 
-def user_config_path() -> Optional[Path]:
+def user_config_path() -> Path | None:
     base = os.environ.get("XDG_CONFIG_HOME") or os.path.join(
         os.path.expanduser("~"), ".config"
     )
@@ -236,7 +237,7 @@ def user_config_path() -> Optional[Path]:
     return None
 
 
-def load_config_file(path: Path) -> Dict[str, Any]:
+def load_config_file(path: Path) -> dict[str, Any]:
     """Parse one config file into a mapping."""
     try:
         text = path.read_text(encoding="utf-8")
@@ -253,9 +254,9 @@ def load_config_file(path: Path) -> Dict[str, Any]:
     return data
 
 
-def merge_config_dicts(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+def merge_config_dicts(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
     """Merge two config mappings, concatenating list-valued keys."""
-    merged: Dict[str, Any] = deep_merge(
+    merged: dict[str, Any] = deep_merge(
         {k: v for k, v in base.items() if k not in _LIST_KEYS},
         {k: v for k, v in override.items() if k not in _LIST_KEYS},
     )
@@ -264,7 +265,7 @@ def merge_config_dicts(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[s
         right = override.get(key)
         if left is None and right is None:
             continue
-        combined: List[Any] = []
+        combined: list[Any] = []
         for value in (left, right):
             for item in _as_sequence(value):
                 if item not in combined:
@@ -273,7 +274,7 @@ def merge_config_dicts(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[s
     return merged
 
 
-def _as_sequence(value: Any) -> List[Any]:
+def _as_sequence(value: Any) -> list[Any]:
     if value is None:
         return []
     if isinstance(value, (list, tuple)):
@@ -286,15 +287,15 @@ def _as_sequence(value: Any) -> List[Any]:
 # ---------------------------------------------------------------------------
 
 def load_config(
-    config_path: Optional[str] = None,
+    config_path: str | None = None,
     *,
     cwd: str = ".",
     no_config: bool = False,
     use_user_config: bool = True,
 ) -> Config:
     """Load and merge configuration into a :class:`Config`."""
-    sources: List[str] = []
-    merged: Dict[str, Any] = {}
+    sources: list[str] = []
+    merged: dict[str, Any] = {}
     root = "."
 
     if use_user_config and not no_config:
@@ -303,7 +304,7 @@ def load_config(
             merged = merge_config_dicts(merged, load_config_file(user_path))
             sources.append(str(user_path))
 
-    project_path: Optional[Path] = None
+    project_path: Path | None = None
     if config_path:
         project_path = Path(config_path)
         if not project_path.is_file():
@@ -319,7 +320,7 @@ def load_config(
     return _build_config(merged, sources, root)
 
 
-def _build_config(raw: Dict[str, Any], sources: List[str], root: str) -> Config:
+def _build_config(raw: dict[str, Any], sources: list[str], root: str) -> Config:
     default_severity = Severity.coerce(raw.get("severity", raw.get("default_severity", "error")))
 
     settings = dict(DEFAULT_SETTINGS)
@@ -329,9 +330,9 @@ def _build_config(raw: Dict[str, Any], sources: List[str], root: str) -> Config:
     elif user_settings is not None:
         raise ConfigError("'settings' must be a mapping")
 
-    rules: List[Rule] = []
-    overrides: Dict[str, Dict[str, Any]] = {}
-    seen: Dict[str, int] = {}
+    rules: list[Rule] = []
+    overrides: dict[str, dict[str, Any]] = {}
+    seen: dict[str, int] = {}
     raw_rules = raw.get("rules") or []
     if not isinstance(raw_rules, list):
         raise ConfigError("'rules' must be a list")
@@ -376,8 +377,8 @@ def _build_config(raw: Dict[str, Any], sources: List[str], root: str) -> Config:
     return config
 
 
-def _resolve_paths(paths: Sequence[str], root: str) -> List[str]:
-    resolved: List[str] = []
+def _resolve_paths(paths: Sequence[str], root: str) -> list[str]:
+    resolved: list[str] = []
     for path in paths:
         expanded = os.path.expanduser(str(path))
         if not os.path.isabs(expanded):
@@ -386,9 +387,9 @@ def _resolve_paths(paths: Sequence[str], root: str) -> List[str]:
     return resolved
 
 
-def default_user_preset_dirs() -> List[str]:
+def default_user_preset_dirs() -> list[str]:
     """Directories searched for extra preset files."""
-    dirs: List[str] = []
+    dirs: list[str] = []
     env = os.environ.get("ALINTER_PRESET_PATH")
     if env:
         dirs.extend(part for part in env.split(os.pathsep) if part)

@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import json
-import xml.etree.ElementTree as ET
-from typing import Any, Dict, List
+import xml.etree.ElementTree as ET  # nosec B405
+from typing import Any
 
 from .. import __version__
 from ..models import Severity
@@ -21,7 +21,7 @@ class JsonReporter(Reporter):
     name = "json"
 
     def render(self, result, *, config=None, options=None, out=None) -> str:
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "tool": "alinter",
             "version": __version__,
             "summary": summarize(result),
@@ -36,8 +36,8 @@ class SarifReporter(Reporter):
     name = "sarif"
 
     def render(self, result, *, config=None, options=None, out=None) -> str:
-        rule_map: Dict[str, Dict[str, Any]] = {}
-        results: List[Dict[str, Any]] = []
+        rule_map: dict[str, dict[str, Any]] = {}
+        results: list[dict[str, Any]] = []
 
         for violation in result.violations:
             if violation.rule_id not in rule_map:
@@ -49,7 +49,7 @@ class SarifReporter(Reporter):
                         "level": _SEVERITY_LEVEL.get(violation.severity, "warning")
                     },
                 }
-            region: Dict[str, Any] = {}
+            region: dict[str, Any] = {}
             if violation.line is not None:
                 region["startLine"] = violation.line
                 region["startColumn"] = violation.column or 1
@@ -57,12 +57,12 @@ class SarifReporter(Reporter):
                     region["endLine"] = violation.end_line
                 if violation.end_column is not None:
                     region["endColumn"] = violation.end_column
-            physical: Dict[str, Any] = {
+            physical: dict[str, Any] = {
                 "artifactLocation": {"uri": violation.path.replace("\\", "/")}
             }
             if region:
                 physical["region"] = region
-            entry: Dict[str, Any] = {
+            entry: dict[str, Any] = {
                 "ruleId": violation.rule_id,
                 "level": _SEVERITY_LEVEL.get(violation.severity, "warning"),
                 "message": {"text": violation.message},
@@ -155,7 +155,7 @@ class GithubReporter(Reporter):
 
     def render(self, result, *, config=None, options=None, out=None) -> str:
         # GitHub annotation commands must not be colorized.
-        lines: List[str] = []
+        lines: list[str] = []
         for violation in result.violations:
             command = {
                 Severity.ERROR: "error",

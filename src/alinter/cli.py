@@ -6,7 +6,7 @@ import argparse
 import json
 import os
 import sys
-from typing import Dict, List, Optional, Sequence
+from collections.abc import Sequence
 
 from . import __version__
 from .config import Config, default_user_preset_dirs, load_config
@@ -58,8 +58,8 @@ rules:
 """
 
 
-def _csv(values: Optional[Sequence[str]]) -> List[str]:
-    out: List[str] = []
+def _csv(values: Sequence[str] | None) -> list[str]:
+    out: list[str] = []
     for value in values or []:
         for part in str(value).split(","):
             part = part.strip()
@@ -360,9 +360,9 @@ def cmd_rules(args: argparse.Namespace) -> int:
     return 0
 
 
-def _all_rules(config: Config, repository: PresetRepository) -> Dict[str, List[str]]:
+def _all_rules(config: Config, repository: PresetRepository) -> dict[str, list[str]]:
     """Map rule id -> list of sources that define it."""
-    found: Dict[str, List[str]] = {}
+    found: dict[str, list[str]] = {}
     for rule in config.rules:
         found.setdefault(rule.id, []).append(rule.source or "config")
     for name in repository.names():
@@ -379,7 +379,7 @@ def cmd_explain(args: argparse.Namespace) -> int:
     repository = _preset_repository(config)
     rule_id = args.rule_id
 
-    rule: Optional[Rule] = config.find_rule(rule_id)
+    rule: Rule | None = config.find_rule(rule_id)
     defined_in = [
         name for name in repository.names()
         if any(r.id == rule_id for r in repository.presets[name].build_rules())
@@ -435,7 +435,7 @@ def cmd_langs(args: argparse.Namespace) -> int:
         exclude=tuple(config.excludes()) + tuple(options.exclude),
         use_gitignore=bool(config.setting("use_gitignore", True)),
     )
-    result: Dict[str, List[str]] = {}
+    result: dict[str, list[str]] = {}
     for item in discovery.files:
         source = engine._load_source(item.path, item.rel_path)
         if source is None:
@@ -460,7 +460,7 @@ def cmd_validate(args: argparse.Namespace) -> int:
     except ConfigError as exc:
         return _die(str(exc))
 
-    problems: List[str] = []
+    problems: list[str] = []
     print("Configuration")
     if config.sources:
         for source in config.sources:
@@ -472,29 +472,32 @@ def cmd_validate(args: argparse.Namespace) -> int:
     print(f"  overrides: {len(config.overrides)}")
     print(f"  extends: {', '.join(config.extends) or '-'}")
 
-    for name in config.extends:
-        if repository.get(name) is None:
-            problems.append(f"unknown preset in extends: {name}")
+    problems.extend(
+        f"unknown preset in extends: {name}"
+        for name in config.extends
+        if repository.get(name) is None
+    )
 
     registry = get_registry()
     for rule in config.rules:
         try:
             registry.create(rule)
-        except ConfigError as exc:
+        except ConfigError as exc:  # noqa: PERF203 - per-rule error collection
             problems.append(str(exc))
 
     known_ids = set(config.rule_ids())
     for name in repository.names():
         for rule in repository.presets[name].build_rules():
             known_ids.add(rule.id)
-    for override_id in config.overrides:
-        if override_id not in known_ids:
-            problems.append(f"override refers to unknown rule: {override_id}")
+    problems.extend(
+        f"override refers to unknown rule: {override_id}"
+        for override_id in config.overrides
+        if override_id not in known_ids
+    )
 
     print("Presets")
     print(f"  available: {len(repository.names())}")
-    for error in repository.errors:
-        problems.append(error)
+    problems.extend(repository.errors)
 
     if problems:
         print("\nProblems:")
@@ -536,7 +539,7 @@ HANDLERS = {
 }
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     """Entry point. Returns a process exit code."""
     raw = list(sys.argv[1:] if argv is None else argv)
     if not raw or (raw[0] not in COMMANDS and raw[0] not in ("-h", "--help", "--version")):

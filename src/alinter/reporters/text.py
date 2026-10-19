@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, TextIO
+from typing import Any, TextIO
 
 from ..models import LintResult, Severity, Violation
 from ..utils import Color, plural
@@ -24,19 +24,21 @@ class TextReporter(Reporter):
         *,
         config: Any = None,
         options: Any = None,
-        out: Optional[TextIO] = None,
+        out: TextIO | None = None,
     ) -> str:
         enabled = getattr(options, "color", None)
         color = Color(enabled)
-        lines: List[str] = []
+        lines: list[str] = []
 
         grouped = self.group_by_file(result.violations)
         quiet = getattr(options, "quiet", False)
         if not quiet:
             for path in sorted(grouped):
                 lines.append(color.paint(path, "bold", "cyan"))
-                for violation in grouped[path]:
-                    lines.append("  " + self._format_violation(violation, color))
+                lines.extend(
+                    "  " + self._format_violation(violation, color)
+                    for violation in grouped[path]
+                )
                 lines.append("")
 
         if result.fixed_files and not getattr(options, "fix_dry_run", False):
@@ -79,7 +81,7 @@ class TextReporter(Reporter):
             rendered += "\n" + color.paint(f"      | {violation.snippet}", "dim")
         return rendered
 
-    def _summary(self, stats: Dict[str, Any], color: Color) -> str:
+    def _summary(self, stats: dict[str, Any], color: Color) -> str:
         total = stats["violations"]
         if total == 0:
             head = color.paint("All clear", "green", "bold")

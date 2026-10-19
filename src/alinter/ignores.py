@@ -25,8 +25,8 @@ Supported directives (``alinter:`` or ``alinter-`` prefix):
 from __future__ import annotations
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, Optional, Set
 
 DIRECTIVE_RE = re.compile(
     r"\balinter[-:]\s*"
@@ -38,7 +38,7 @@ DIRECTIVE_RE = re.compile(
 ALL = "*"
 
 
-def _parse_ids(raw: Optional[str]) -> Set[str]:
+def _parse_ids(raw: str | None) -> set[str]:
     if not raw:
         return {ALL}
     ids = {token for token in re.split(r"[,\s]+", raw.strip()) if token}
@@ -49,8 +49,8 @@ def _parse_ids(raw: Optional[str]) -> Set[str]:
 class Suppressions:
     """Per-file suppression state."""
 
-    file_ids: Set[str] = field(default_factory=set)
-    lines: Dict[int, Set[str]] = field(default_factory=dict)
+    file_ids: set[str] = field(default_factory=set)
+    lines: dict[int, set[str]] = field(default_factory=dict)
     directives: int = 0
 
     def add_file(self, ids: Iterable[str]) -> None:
@@ -65,7 +65,7 @@ class Suppressions:
         self.lines.setdefault(line, set()).update(ids)
         self.directives += 1
 
-    def is_suppressed(self, rule_id: str, line: Optional[int]) -> bool:
+    def is_suppressed(self, rule_id: str, line: int | None) -> bool:
         if ALL in self.file_ids or rule_id in self.file_ids:
             return True
         if line is not None:

@@ -26,3 +26,17 @@ This project adheres to [Semantic Versioning](https://semver.org/).
   `validate`, `version` (plus `types`).
 - Plugin system via `alinter.checks` entry points and `plugins:` config.
 - pre-commit hook definition (`.pre-commit-hooks.yaml`).
+
+### Security
+
+- The `structure` XML check uses `defusedxml` when installed (via the
+  `alinter[xml]` extra) and only falls back to the standard library for the
+  user's own trusted project files.
+- The opt-in `command` check is the only place subprocesses are spawned; every
+  `# nosec` site documents why it is safe.
+
+### Tooling
+
+- Ruff (`ruff check`) and bandit (`bandit -c pyproject.toml`) are configured in
+  `pyproject.toml` and run in CI and pre-commit alongside `pyflakes` and
+  alinter's self-lint.

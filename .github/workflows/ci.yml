@@ -19,10 +19,14 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install
         run: pip install -e ".[dev]"
+      - name: Lint (ruff)
+        run: ruff check src tests examples
       - name: Lint the linter
         run: |
           pyflakes src/alinter tests examples
-          alinter src tests examples
+          alinter check src tests examples
+      - name: Security (bandit)
+        run: bandit -c pyproject.toml -r src/alinter
       - name: Test
         run: python -m pytest -q
 

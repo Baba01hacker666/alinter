@@ -10,7 +10,7 @@ or publish it via the ``alinter.checks`` entry-point group.
 
 from __future__ import annotations
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from alinter.checks.base import Check
 from alinter.models import SourceFile, Violation
