@@ -12,6 +12,7 @@ rules:
     severity: warning
     pattern: '^#\s+\S'
     flags: [MULTILINE]
+    ignore_fences: true   # `# comment` lines inside fenced code are not headings
     mode: count
     max: 1
     message: "found {count} top-level headings; expected at most {max}"

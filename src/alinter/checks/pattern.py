@@ -3,6 +3,10 @@
 Both share the same engine: search a file for matches, then act according to
 ``mode`` (``forbidden``, ``required`` or ``count``). Optional ``fix`` values
 produce auto-fixes.
+
+Matches can optionally ignore fenced code blocks (``ignore_fences``), which
+matters for Markdown-ish formats where a line such as ``# comment`` inside a
+```` ``` ```` block must not be mistaken for a heading.
 """
 
 from __future__ import annotations
@@ -14,6 +18,38 @@ from typing import Any
 from ..models import SourceFile, TextEdit, Violation
 from ..utils import as_bool, as_list, truncate
 from .base import Check
+
+#: Opening/closing fences are runs of three or more backticks or tildes.
+_FENCE_RE = re.compile(r"^[ \t]{0,3}(`{3,}|~{3,})")
+
+
+def fenced_ranges(text: str) -> list[tuple[int, int]]:
+    """Return ``(start, end)`` character ranges of fenced code blocks.
+
+    A block opens with three or more backticks or tildes and closes with a
+    marker of the same character. An unterminated block extends to EOF.
+    """
+    ranges: list[tuple[int, int]] = []
+    start: int | None = None
+    marker = ""
+    offset = 0
+    for line in text.splitlines(keepends=True):
+        match = _FENCE_RE.match(line)
+        if match:
+            fence = match.group(1)
+            if start is None:
+                start, marker = offset, fence[0]
+            elif fence[0] == marker:
+                ranges.append((start, offset + len(line)))
+                start = None
+        offset += len(line)
+    if start is not None:
+        ranges.append((start, len(text)))
+    return ranges
+
+
+def _in_ranges(offset: int, ranges: list[tuple[int, int]]) -> bool:
+    return any(begin <= offset < end for begin, end in ranges)
 
 FLAG_NAMES: dict[str, int] = {
     "IGNORECASE": re.IGNORECASE, "I": re.IGNORECASE, "i": re.IGNORECASE,
@@ -54,6 +90,7 @@ class PatternCheck(Check):
                 "(expected forbidden, required or count)"
             )
         self.per_line = as_bool(self.param("per_line", False))
+        self.ignore_fences = as_bool(self.param("ignore_fences", False))
         self.fix_template = self.param("fix")
         self.min_count = self.param("min")
         self.max_count = self.param("max")
@@ -87,6 +124,9 @@ class PatternCheck(Check):
 
     def run(self, file: SourceFile) -> Iterable[Violation]:
         matches = list(self.regex.finditer(file.text))
+        if self.ignore_fences and matches:
+            ranges = fenced_ranges(file.text)
+            matches = [m for m in matches if not _in_ranges(m.start(), ranges)]
 
         if self.mode == "required":
             if not matches:

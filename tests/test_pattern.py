@@ -78,3 +78,44 @@ def test_literal_forbidden_default(build_check, source_factory):
     check = build_check({"id": "r", "type": "literal", "value": "FIXME"})
     assert list(check.run(source_factory("a FIXME b\n")))
     assert list(check.run(source_factory("nothing\n"))) == []
+
+
+def test_regex_ignore_fences_skips_code_blocks(build_check, source_factory):
+    check = build_check(
+        {
+            "id": "r",
+            "type": "regex",
+            "pattern": r"^#\s+\S",
+            "mode": "count",
+            "max": 1,
+            "ignore_fences": True,
+        }
+    )
+    text = "# Title\n\n```yaml\n# not a heading\n```\n\ntext\n"
+    assert list(check.run(source_factory(text))) == []
+
+
+def test_regex_ignore_fences_still_counts_real_headings(build_check, source_factory):
+    check = build_check(
+        {
+            "id": "r",
+            "type": "regex",
+            "pattern": r"^#\s+\S",
+            "mode": "count",
+            "max": 1,
+            "ignore_fences": True,
+        }
+    )
+    text = "# One\n\n```\ncode\n```\n\n# Two\n"
+    assert list(check.run(source_factory(text)))
+
+
+def test_fenced_ranges_handles_tildes_and_unterminated():
+    from alinter.checks.pattern import fenced_ranges
+
+    ranges = fenced_ranges("a\n~~~\ncode\n~~~\nb\n")
+    assert len(ranges) == 1
+    # An unterminated fence extends to the end of the text.
+    text = "a\n```\ncode\n"
+    ranges = fenced_ranges(text)
+    assert ranges == [(text.index("```"), len(text))]
