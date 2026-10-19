@@ -41,6 +41,11 @@ def _load_gitignore(cwd: str) -> pathspec.PathSpec | None:
                 continue
     if not patterns:
         return None
+    # pathspec >= 0.12 ships GitIgnoreSpec; older versions only understand
+    # "gitwildmatch" (which newer versions deprecate).
+    spec_builder = getattr(pathspec, "GitIgnoreSpec", None)
+    if spec_builder is not None:
+        return spec_builder.from_lines(patterns)
     return pathspec.PathSpec.from_lines("gitwildmatch", patterns)
 
 

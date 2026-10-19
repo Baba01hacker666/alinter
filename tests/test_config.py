@@ -138,3 +138,79 @@ def test_extends_and_plugins_collected(project):
     assert config.plugins == ("my.plugin",)
     assert config.preset_paths
     assert config.preset_paths[0].endswith("presets")
+
+
+def test_build_rule_rejects_bad_shapes():
+    from alinter.config import build_rule
+
+    with pytest.raises(ConfigError):
+        build_rule("just-a-string")
+    with pytest.raises(ConfigError):
+        build_rule(42)
+    with pytest.raises(ConfigError):
+        build_rule({"id": "x", "type": "regex", "pattern": "a", "params": 5})
+
+
+def test_build_rule_check_alias_for_type():
+    rule = build_rule({"id": "x", "check": "literal", "value": "a"})
+    assert rule.type == "literal"
+
+
+def test_config_setting_fallbacks():
+    config = load_config(None, use_user_config=False, cwd=".")
+    assert config.setting("allow_commands") is False
+    assert config.setting("unknown-key", "fallback") == "fallback"
+
+
+def test_find_rule():
+    config = load_config(None, use_user_config=False, cwd=".")
+    assert config.find_rule("does-not-exist") is None
+
+
+def test_find_config_file_from_file_path(project):
+    path = project.config("rules: []")
+    found = find_config_file(str(path))
+    assert found is not None
+    assert found.name == ".alinter.yaml"
+
+
+def test_has_tool_alinter_missing_file(tmp_path):
+    from alinter.config import _has_tool_alinter
+
+    assert _has_tool_alinter(tmp_path / "nope.toml") is False
+
+
+def test_load_config_file_missing_raises(tmp_path):
+    from alinter.config import load_config_file
+
+    with pytest.raises(ConfigError):
+        load_config_file(tmp_path / "nope.yaml")
+
+
+def test_user_config_path_and_merge(project, monkeypatch, tmp_path):
+    from alinter.config import user_config_path
+
+    xdg = tmp_path / "xdg"
+    (xdg / "alinter").mkdir(parents=True)
+    (xdg / "alinter" / "config.yaml").write_text(
+        "auto_detect: false\n", encoding="utf-8"
+    )
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg))
+    assert user_config_path() is not None
+    config = load_config(None, cwd=str(project.root), use_user_config=True)
+    assert config.auto_detect is False
+
+
+def test_override_entry_without_id_raises(project):
+    path = project.config("rules:\n  - severity: off\n")
+    with pytest.raises(ConfigError):
+        load_config(str(path), use_user_config=False)
+
+
+def test_default_user_preset_dirs_reads_env(monkeypatch, tmp_path):
+    from alinter.config import default_user_preset_dirs
+
+    monkeypatch.setenv("ALINTER_PRESET_PATH", f"{tmp_path}/a{__import__('os').pathsep}{tmp_path}/b")
+    dirs = default_user_preset_dirs()
+    assert str(tmp_path / "a") in dirs
+    assert str(tmp_path / "b") in dirs

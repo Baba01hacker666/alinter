@@ -45,6 +45,7 @@ gitignore = ["pathspec>=0.11"]
 xml = ["defusedxml>=0.7"]
 dev = [
   "pytest>=7.0",
+  "pytest-cov>=4.0",
   "build>=1.0",
   "pyflakes>=3.0",
   "ruff>=0.6",
@@ -73,15 +74,33 @@ include = [
   "/src",
   "/tests",
   "/examples",
+  "/docs",
   "/README.md",
-  "/LICENSE",
+  "/AGENTS.md",
+  "/CONTRIBUTING.md",
+  "/SECURITY.md",
   "/CHANGELOG.md",
+  "/LICENSE",
   "/pyproject.toml",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.coverage.run]
+source = ["alinter"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 93
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+]
 
 [tool.ruff]
 target-version = "py39"

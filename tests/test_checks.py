@@ -124,3 +124,109 @@ def test_filename_extension(build_check, source_factory):
     check = build_check({"id": "r", "type": "filename", "extension": [".sh"]})
     assert list(check.run(source_factory("x\n", rel="run.bash")))
     assert list(check.run(source_factory("x\n", rel="run.sh"))) == []
+
+
+def test_message_template_falls_back_on_unknown_placeholder(build_check, source_factory):
+    check = build_check(
+        {"id": "r", "type": "literal", "value": "x", "message": "hi {nope} there"}
+    )
+    (violation,) = list(check.run(source_factory("x\n")))
+    assert violation.message == "hi {nope} there"
+
+
+def test_message_uses_default_when_unset(build_check, source_factory):
+    check = build_check({"id": "r", "type": "no-trailing-whitespace"})
+    (violation,) = list(check.run(source_factory("x  \n")))
+    assert violation.message == "trailing whitespace"
+
+
+def test_max_line_length_requires_length(build_check):
+    import pytest
+
+    from alinter.utils import ConfigError
+
+    with pytest.raises(ConfigError):
+        build_check({"id": "r", "type": "max-line-length"})
+
+
+def test_max_line_length_rejects_non_positive(build_check):
+    import pytest
+
+    from alinter.utils import ConfigError
+
+    with pytest.raises(ConfigError):
+        build_check({"id": "r", "type": "max-line-length", "length": 0})
+
+
+def test_max_line_length_tab_width(build_check, source_factory):
+    check = build_check(
+        {"id": "r", "type": "max-line-length", "length": 8, "tab_width": 4}
+    )
+    # Three tabs expand to 12 columns, over the limit of 8.
+    assert list(check.run(source_factory("\t\t\tx\n")))
+
+
+def test_final_newline_empty_file_is_ok(build_check, source_factory):
+    check = build_check({"id": "r", "type": "final-newline"})
+    assert list(check.run(source_factory(""))) == []
+
+
+def test_line_ending_crlf_normalizes_mixed(build_check, source_factory):
+    check = build_check({"id": "r", "type": "line-ending", "style": "crlf"})
+    (violation,) = list(check.run(source_factory("a\nb\r\n")))
+    new_text, _ = apply_edits("a\nb\r\n", [violation.fix])
+    assert new_text == "a\r\nb\r\n"
+
+
+def test_line_ending_invalid_style(build_check):
+    import pytest
+
+    from alinter.utils import ConfigError
+
+    with pytest.raises(ConfigError):
+        build_check({"id": "r", "type": "line-ending", "style": "sideways"})
+
+
+def test_max_lines_without_counting_blank(build_check, source_factory):
+    check = build_check(
+        {"id": "r", "type": "max-lines", "max": 2, "count_blank": False}
+    )
+    assert list(check.run(source_factory("a\n\n\nb\nc\n")))
+    assert list(check.run(source_factory("a\n\n\nb\n"))) == []
+
+
+def test_no_tabs_invalid_mode(build_check):
+    import pytest
+
+    from alinter.utils import ConfigError
+
+    with pytest.raises(ConfigError):
+        build_check({"id": "r", "type": "no-tabs", "mode": "middle"})
+
+
+def test_encoding_no_bom_is_clean(build_check, source_factory):
+    check = build_check({"id": "r", "type": "encoding", "expect": "utf-8", "forbid_bom": True})
+    assert list(check.run(source_factory("plain", encoding="utf-8", has_bom=False))) == []
+
+
+def test_filename_forbidden_mode(build_check, source_factory):
+    check = build_check(
+        {"id": "r", "type": "filename", "pattern": r"^test_", "mode": "forbidden"}
+    )
+    assert list(check.run(source_factory("x\n", rel="test_thing.py")))
+    assert list(check.run(source_factory("x\n", rel="thing.py"))) == []
+
+
+def test_filename_extension_without_dot(build_check, source_factory):
+    check = build_check({"id": "r", "type": "filename", "extension": ["txt"]})
+    assert list(check.run(source_factory("x\n", rel="a.md")))
+    assert list(check.run(source_factory("x\n", rel="a.txt"))) == []
+
+
+def test_filename_requires_pattern_or_extension(build_check):
+    import pytest
+
+    from alinter.utils import ConfigError
+
+    with pytest.raises(ConfigError):
+        build_check({"id": "r", "type": "filename"})
