@@ -1,0 +1,40 @@
+name: dart
+language: dart
+description: "Checks for Dart source files."
+detect:
+  extensions: [".dart"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: dart/no-print
+    type: regex
+    description: "Prefer a logger over print for diagnostics."
+    severity: info
+    message: "prefer a logger over print"
+    pattern: '^\s*print\s*\('
+  - id: dart/no-dynamic
+    type: regex
+    description: "Prefer explicit types over dynamic."
+    severity: info
+    message: "prefer explicit types over dynamic"
+    pattern: '\bdynamic\b'
+  - id: dart/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: dart/max-line-length
+    type: max-line-length
+    description: "Match the default dart format line width."
+    severity: warning
+    length: 80
+  - id: dart/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: dart/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

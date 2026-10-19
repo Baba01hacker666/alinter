@@ -1,0 +1,54 @@
+name: perl
+language: perl
+description: "Checks for Perl source files."
+detect:
+  extensions: [".pl", ".pm", ".t", ".pod", ".psgi"]
+  filenames: ["cpanfile"]
+  shebangs: ["perl"]
+rules:
+  - id: perl/use-strict
+    type: regex
+    description: "Enable compile-time checks with use strict."
+    severity: warning
+    message: "add use strict; at the top of the file"
+    pattern: '\buse\s+strict\b'
+    mode: required
+  - id: perl/use-warnings
+    type: regex
+    description: "Enable diagnostics with use warnings."
+    severity: warning
+    message: "add use warnings; at the top of the file"
+    pattern: '\buse\s+warnings\b'
+    mode: required
+  - id: perl/no-print-debug
+    type: regex
+    description: "Prefer logging over bare print statements."
+    severity: info
+    message: "prefer a logger over print"
+    pattern: '^\s*print\b'
+  - id: perl/no-bareword-filehandle
+    type: regex
+    description: "Use lexical filehandles with three-argument open."
+    severity: info
+    message: "use a lexical filehandle and three-arg open"
+    pattern: 'open\s*\(\s*[A-Z]'
+  - id: perl/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: perl/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: perl/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: perl/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

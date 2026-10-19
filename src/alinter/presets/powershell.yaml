@@ -1,0 +1,49 @@
+name: powershell
+language: powershell
+description: "Checks for PowerShell scripts and modules."
+detect:
+  extensions: [".ps1", ".psm1", ".psd1", ".ps1xml"]
+  filenames: []
+  shebangs: ["pwsh", "powershell"]
+rules:
+  - id: powershell/no-write-host
+    type: regex
+    description: "Write-Host bypasses the output pipeline."
+    severity: warning
+    message: "use Write-Output or Write-Verbose instead of Write-Host"
+    pattern: '\bWrite-Host\b'
+    flags: [IGNORECASE]
+  - id: powershell/no-invoke-expression
+    type: regex
+    description: "Invoke-Expression executes arbitrary code."
+    severity: error
+    message: "Invoke-Expression executes arbitrary code; avoid it"
+    pattern: '\b(Invoke-Expression|iex)\b'
+    flags: [IGNORECASE]
+  - id: powershell/no-plaintext-password
+    type: regex
+    description: "Plain-text passwords may leak into logs and history."
+    severity: warning
+    message: "avoid plaintext passwords; prompt with -AsSecureString"
+    pattern: '-AsPlainText\b'
+    flags: [IGNORECASE]
+  - id: powershell/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: powershell/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: powershell/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: powershell/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

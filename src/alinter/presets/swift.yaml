@@ -1,0 +1,45 @@
+name: swift
+language: swift
+description: "Checks for Swift source files."
+detect:
+  extensions: [".swift"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: swift/no-force-try
+    type: regex
+    description: "try! crashes on a thrown error."
+    severity: warning
+    message: "avoid try!; handle the thrown error"
+    pattern: '\btry!'
+  - id: swift/no-force-cast
+    type: regex
+    description: "as! crashes on a failed cast."
+    severity: warning
+    message: "avoid as!; use conditional casting"
+    pattern: '\bas!\s'
+  - id: swift/no-force-unwrap
+    type: regex
+    description: "Detect likely force unwraps that can crash."
+    severity: info
+    message: "possible force unwrap; prefer optional binding"
+    pattern: '[A-Za-z0-9_\)\]]!(?!=)'
+  - id: swift/no-print
+    type: regex
+    description: "Prefer os.Logger over print for diagnostics."
+    severity: info
+    message: "prefer os.Logger over print"
+    pattern: '\bprint\s*\('
+  - id: swift/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: swift/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: swift/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

@@ -1,0 +1,72 @@
+name: python
+language: python
+description: "Checks for Python source files."
+detect:
+  extensions: [".py", ".pyi"]
+  filenames: ["SConstruct", "wscript"]
+  shebangs: ["python", "python2", "python3"]
+rules:
+  - id: python/no-print
+    type: regex
+    description: "Use logging instead of print()."
+    severity: warning
+    pattern: '^\s*print\s*\('
+    mode: forbidden
+    message: "print() call found; use logging instead"
+
+  - id: python/no-bare-except
+    type: regex
+    description: "Bare 'except:' hides bugs; catch specific exceptions."
+    severity: error
+    pattern: '^\s*except\s*:'
+    mode: forbidden
+    message: "bare 'except:' catches everything; name the exception"
+
+  - id: python/no-wildcard-import
+    type: regex
+    description: "Wildcard imports make names unclear."
+    severity: warning
+    pattern: '^\s*from\s+\S+\s+import\s+\*'
+    mode: forbidden
+    message: "wildcard import; import names explicitly"
+
+  - id: python/no-eval-exec
+    type: regex
+    description: "eval()/exec() are dangerous with untrusted input."
+    severity: error
+    pattern: '\b(?:eval|exec)\s*\('
+    mode: forbidden
+    message: "use of {match} is dangerous"
+
+  - id: python/no-pdb
+    type: regex
+    description: "Debugger calls must not be committed."
+    severity: error
+    pattern: '(?:^\s*import\s+pdb\b|pdb\.set_trace\s*\(|^\s*breakpoint\s*\()'
+    mode: forbidden
+    message: "debugger call left in code"
+
+  - id: python/no-mutable-default-arg
+    type: regex
+    description: "Mutable default arguments are shared between calls."
+    severity: warning
+    pattern: 'def\s+\w+\s*\([^)]*=\s*(?:\[\]|\{\})'
+    mode: forbidden
+    message: "mutable default argument; use None instead"
+
+  - id: python/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short."
+    severity: info
+    length: 100
+    ignore_urls: true
+    message: "line too long ({length} > {limit})"
+
+  - id: python/type-ignore
+    type: regex
+    description: "Prefer '# type: ignore[code]' over a bare ignore."
+    severity: info
+    pattern: '#\s*type:\s*ignore\s*$'
+    flags: [MULTILINE]
+    mode: forbidden
+    message: "type: ignore without an error code"

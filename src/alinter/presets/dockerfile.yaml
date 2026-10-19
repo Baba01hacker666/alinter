@@ -1,0 +1,42 @@
+name: dockerfile
+language: dockerfile
+description: "Checks for Dockerfiles and Containerfiles."
+detect:
+  extensions: [".dockerfile"]
+  filenames: ["Dockerfile", "Containerfile", "dockerfile"]
+  shebangs: []
+rules:
+  - id: dockerfile/no-latest-tag
+    type: regex
+    description: "Pin base image versions instead of using :latest."
+    severity: warning
+    pattern: '^FROM\s+\S+:latest\b'
+    flags: [IGNORECASE]
+    mode: forbidden
+    message: "base image uses the 'latest' tag; pin a version"
+
+  - id: dockerfile/no-sudo
+    type: regex
+    description: "Containers run as root or a chosen user; sudo is unnecessary."
+    severity: warning
+    pattern: '^\s*RUN\s+.*\bsudo\b'
+    flags: [IGNORECASE]
+    mode: forbidden
+    message: "avoid sudo inside a Dockerfile"
+
+  - id: dockerfile/prefer-copy
+    type: regex
+    description: "ADD has surprising behaviour; COPY is usually what you want."
+    severity: info
+    pattern: '^ADD\s'
+    flags: [IGNORECASE]
+    mode: forbidden
+    message: "prefer COPY over ADD"
+
+  - id: dockerfile/apt-install
+    type: regex
+    description: "Install without recommends and clean the apt cache."
+    severity: info
+    pattern: 'apt-get\s+install(?!.*--no-install-recommends)'
+    mode: forbidden
+    message: "apt-get install without --no-install-recommends"

@@ -1,0 +1,52 @@
+name: go
+language: go
+description: "Checks for Go source files."
+detect:
+  extensions: [".go"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: go/no-panic
+    type: regex
+    description: "Disallow explicit panics in library code."
+    severity: warning
+    message: "panic() found; return an error instead"
+    pattern: '\bpanic\s*\('
+  - id: go/no-fmt-print
+    type: regex
+    description: "Discourage ad-hoc printing via the fmt package."
+    severity: warning
+    message: "prefer structured logging over fmt.Print"
+    pattern: '\bfmt\.Print(f|ln)?\s*\('
+  - id: go/no-log-fatal
+    type: regex
+    description: "Disallow log.Fatal, which exits the process."
+    severity: warning
+    message: "log.Fatal exits the process; return an error instead"
+    pattern: '\blog\.(Fatal|Fatalf|Fatalln)\s*\('
+  - id: go/no-ignored-error
+    type: regex
+    description: "Detect discarded function results that are likely errors."
+    severity: warning
+    message: "discarded return value; handle the error"
+    pattern: '\b_\s*=\s*[A-Za-z_][\w.]*\('
+  - id: go/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: go/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: go/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: go/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

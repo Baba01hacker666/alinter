@@ -1,0 +1,52 @@
+name: php
+language: php
+description: "Checks for PHP source files."
+detect:
+  extensions: [".php", ".phtml", ".php3", ".php4", ".php5", ".inc"]
+  filenames: []
+  shebangs: ["php"]
+rules:
+  - id: php/no-var-dump
+    type: regex
+    description: "Flag leftover var_dump debugging output."
+    severity: warning
+    message: "remove var_dump() debugging"
+    pattern: '\bvar_dump\s*\('
+  - id: php/no-eval
+    type: regex
+    description: "eval() executes arbitrary code and is a security risk."
+    severity: error
+    message: "eval() executes arbitrary code and is dangerous"
+    pattern: '\beval\s*\('
+  - id: php/no-die-exit
+    type: regex
+    description: "Avoid terminating the process mid-request."
+    severity: warning
+    message: "avoid die()/exit(); throw an exception instead"
+    pattern: '\b(die|exit)\s*[\(;]'
+  - id: php/no-short-tags
+    type: regex
+    description: "Avoid PHP short open tags."
+    severity: info
+    message: "avoid PHP short open tags; use the full <?php tag"
+    pattern: '<\?(?!php)'
+  - id: php/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: php/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: php/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: php/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

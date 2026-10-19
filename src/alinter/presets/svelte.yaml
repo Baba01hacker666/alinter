@@ -1,0 +1,46 @@
+name: svelte
+language: svelte
+description: "Checks for Svelte components."
+detect:
+  extensions: [".svelte"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: svelte/no-html
+    type: regex
+    description: "Raw HTML injection can cause cross-site scripting."
+    severity: warning
+    message: "raw HTML injection via @html; sanitize input"
+    pattern: '@html\b'
+  - id: svelte/no-inline-style
+    type: regex
+    description: "Prefer component styles over inline styles."
+    severity: info
+    message: "avoid inline styles; use component styles"
+    pattern: '\bstyle\s*=\s*"'
+  - id: svelte/no-console
+    type: regex
+    description: "Remove console statements before shipping."
+    severity: info
+    message: "remove console statements before shipping"
+    pattern: '\bconsole\.\w+\s*\('
+  - id: svelte/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: svelte/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: svelte/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: svelte/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

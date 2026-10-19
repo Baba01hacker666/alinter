@@ -1,0 +1,46 @@
+name: vue
+language: vue
+description: "Checks for Vue single-file components."
+detect:
+  extensions: [".vue"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: vue/no-v-html
+    type: regex
+    description: "v-html can introduce cross-site scripting."
+    severity: warning
+    message: "v-html can introduce XSS; sanitize untrusted input"
+    pattern: '\bv-html\b'
+  - id: vue/no-inline-style
+    type: regex
+    description: "Prefer scoped CSS classes over inline styles."
+    severity: info
+    message: "avoid inline styles; use scoped CSS classes"
+    pattern: '\bstyle\s*=\s*"'
+  - id: vue/no-console
+    type: regex
+    description: "Remove console statements before shipping."
+    severity: info
+    message: "remove console statements before shipping"
+    pattern: '\bconsole\.\w+\s*\('
+  - id: vue/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: vue/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: vue/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: vue/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

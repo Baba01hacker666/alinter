@@ -1,0 +1,45 @@
+name: generic
+language: generic
+description: "Baseline checks applied to every text file."
+always_apply: true
+detect:
+  extensions: []
+  filenames: []
+  shebangs: []
+rules:
+  - id: generic/trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Lines should not end with whitespace."
+    severity: info
+    message: "trailing whitespace"
+
+  - id: generic/final-newline
+    type: final-newline
+    description: "Files should end with a single newline."
+    severity: info
+    value: require
+    message: "file has no final newline"
+
+  - id: generic/line-ending
+    type: line-ending
+    description: "Use LF line endings."
+    severity: info
+    style: lf
+    message: "file uses CRLF line endings; expected LF"
+
+  - id: generic/no-bom
+    type: encoding
+    description: "Files should be UTF-8 without a byte-order mark."
+    severity: info
+    expect: utf-8
+    forbid_bom: true
+    message: "byte-order mark (BOM) found"
+
+  - id: generic/conflict-markers
+    type: regex
+    description: "Unresolved merge conflict markers must not be committed."
+    severity: error
+    pattern: '^(?:<{7}|={7}|>{7})'
+    flags: [MULTILINE]
+    mode: forbidden
+    message: "merge conflict marker found: {match}"

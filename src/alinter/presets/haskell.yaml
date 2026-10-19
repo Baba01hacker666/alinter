@@ -1,0 +1,52 @@
+name: haskell
+language: haskell
+description: "Checks for Haskell source files."
+detect:
+  extensions: [".hs", ".lhs", ".hsc"]
+  filenames: []
+  shebangs: ["runghc", "runhaskell", "stack"]
+rules:
+  - id: haskell/no-undefined
+    type: regex
+    description: "undefined throws a runtime error when evaluated."
+    severity: warning
+    message: "undefined will crash at runtime"
+    pattern: '\bundefined\b'
+  - id: haskell/no-fromjust
+    type: regex
+    description: "fromJust is partial and can crash."
+    severity: warning
+    message: "fromJust is partial; pattern match instead"
+    pattern: '\bfromJust\b'
+  - id: haskell/no-error
+    type: regex
+    description: "Prefer Maybe/Either over the error function."
+    severity: warning
+    message: "prefer Maybe/Either over error"
+    pattern: '\berror\s+"'
+  - id: haskell/no-partial-functions
+    type: regex
+    description: "Partial list functions crash on empty input."
+    severity: info
+    message: "partial function can crash on empty input; pattern match instead"
+    pattern: '\b(head|tail|init|last)\b'
+  - id: haskell/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: haskell/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 100
+  - id: haskell/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: haskell/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

@@ -1,0 +1,46 @@
+name: java
+language: java
+description: "Checks for Java source files."
+detect:
+  extensions: [".java"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: java/no-system-out
+    type: regex
+    description: "Discourage printing to stdout/stderr directly."
+    severity: warning
+    message: "use a logger instead of System.out/err"
+    pattern: 'System\.(out|err)\.print(ln|f)?\s*\('
+  - id: java/no-print-stack-trace
+    type: regex
+    description: "Discourage printStackTrace in favour of logging."
+    severity: warning
+    message: "log the exception instead of printStackTrace()"
+    pattern: '\.printStackTrace\s*\(\s*\)'
+  - id: java/no-star-import
+    type: regex
+    description: "Avoid wildcard imports for clarity."
+    severity: info
+    message: "avoid wildcard imports"
+    pattern: '^import\s+[\w.]+\.\*\s*;'
+  - id: java/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: java/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: java/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: java/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

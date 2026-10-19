@@ -1,0 +1,46 @@
+name: scss
+language: scss
+description: "Checks for SCSS/Sass stylesheets."
+detect:
+  extensions: [".scss", ".sass"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: scss/no-important
+    type: regex
+    description: "Avoid !important, a symptom of specificity problems."
+    severity: warning
+    message: "avoid !important; fix specificity instead"
+    pattern: '!\s*important\b'
+  - id: scss/no-id-selector
+    type: regex
+    description: "Prefer class selectors over ID selectors for styling."
+    severity: info
+    message: "prefer class selectors over IDs"
+    pattern: '(^|[\s,>+~])#[A-Za-z][\w-]*\s*[,{]'
+  - id: scss/no-deep-selector
+    type: regex
+    description: "Avoid deprecated deep/::v-deep piercing selectors."
+    severity: info
+    message: "avoid deep selectors; style the child component instead"
+    pattern: '(:{2}v-deep|/deep/|>>>)'
+  - id: scss/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: scss/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: scss/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: scss/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

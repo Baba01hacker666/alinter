@@ -1,0 +1,46 @@
+name: makefile
+language: makefile
+description: "Checks for Makefiles."
+detect:
+  extensions: []
+  filenames: ["Makefile", "makefile", "GNUmakefile"]
+  shebangs: []
+rules:
+  - id: makefile/no-sudo
+    type: regex
+    description: "Builds should not require elevated privileges."
+    severity: warning
+    message: "avoid sudo inside build recipes"
+    pattern: '(^|\s)sudo\s'
+    files: ["**/Makefile", "**/makefile", "**/GNUmakefile"]
+  - id: makefile/no-rm-rf-root
+    type: regex
+    description: "Guard against catastrophic recursive deletes."
+    severity: error
+    message: "refusing recursive delete of the filesystem root"
+    pattern: 'rm\s+-(rf|fr)\s+/'
+    files: ["**/Makefile", "**/makefile", "**/GNUmakefile"]
+  - id: makefile/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+    files: ["**/Makefile", "**/makefile", "**/GNUmakefile"]
+  - id: makefile/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+    files: ["**/Makefile", "**/makefile", "**/GNUmakefile"]
+  - id: makefile/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+    files: ["**/Makefile", "**/makefile", "**/GNUmakefile"]
+  - id: makefile/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning
+    files: ["**/Makefile", "**/makefile", "**/GNUmakefile"]

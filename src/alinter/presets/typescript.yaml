@@ -1,0 +1,63 @@
+name: typescript
+language: typescript
+description: "Checks for TypeScript source files."
+detect:
+  extensions: [".ts", ".tsx", ".mts", ".cts"]
+  filenames: []
+  shebangs: ["ts-node"]
+rules:
+  - id: typescript/no-debugger
+    type: regex
+    description: "Remove debugger statements before committing."
+    severity: error
+    pattern: '^\s*debugger\b'
+    mode: forbidden
+    message: "debugger statement found"
+
+  - id: typescript/no-console
+    type: regex
+    description: "Avoid console.log/debug in committed code."
+    severity: warning
+    pattern: '\bconsole\.(?:log|debug)\s*\('
+    mode: forbidden
+    message: "console.{match} left in code"
+
+  - id: typescript/no-any
+    type: regex
+    description: "Explicit any defeats the type checker."
+    severity: info
+    pattern: ':\s*any\b'
+    mode: forbidden
+    message: "avoid the 'any' type; use a precise type"
+
+  - id: typescript/no-ts-ignore
+    type: regex
+    description: "Prefer @ts-expect-error with an explanation over @ts-ignore."
+    severity: warning
+    pattern: '@ts-ignore'
+    mode: forbidden
+    message: "@ts-ignore suppresses errors; use @ts-expect-error"
+
+  - id: typescript/no-var
+    type: regex
+    description: "Prefer let/const over var."
+    severity: warning
+    pattern: '^\s*var\s+[A-Za-z_$]'
+    mode: forbidden
+    message: "use let or const instead of var"
+
+  - id: typescript/eqeqeq
+    type: regex
+    description: "Use === / !== instead of == / !=."
+    severity: warning
+    pattern: '(?<![=!<>])==(?!=)|(?<![=!<>])!=(?!=)'
+    mode: forbidden
+    message: "use the strict comparison operator ({match})"
+
+  - id: typescript/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short."
+    severity: info
+    length: 120
+    ignore_urls: true
+    message: "line too long ({length} > {limit})"

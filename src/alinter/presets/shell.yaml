@@ -1,0 +1,55 @@
+name: shell
+language: shell
+description: "Checks for POSIX shell and Bash scripts."
+detect:
+  extensions: [".sh", ".bash", ".zsh", ".ksh"]
+  filenames: [".bashrc", ".bash_profile", ".profile", ".zshrc", ".bash_aliases"]
+  shebangs: ["sh", "bash", "dash", "zsh", "ksh"]
+rules:
+  - id: shell/no-eval
+    type: regex
+    description: "eval() re-parses input and is easy to get wrong."
+    severity: warning
+    pattern: '\beval\b'
+    mode: forbidden
+    message: "avoid eval; it re-parses its arguments"
+
+  - id: shell/curl-pipe-shell
+    type: regex
+    description: "Piping a download straight into a shell is unsafe."
+    severity: error
+    pattern: '(?:curl|wget)[^|\n]*\|\s*(?:sudo\s+)?(?:ba|z|k)?sh\b'
+    mode: forbidden
+    message: "downloading and executing in one pipe is unsafe"
+
+  - id: shell/no-backticks
+    type: regex
+    description: "Prefer $(...) over legacy backticks."
+    severity: info
+    pattern: '`[^`]*`'
+    mode: forbidden
+    message: "use $(...) instead of backticks"
+
+  - id: shell/set-e
+    type: regex
+    description: "Scripts should fail fast with 'set -e'."
+    severity: info
+    pattern: 'set\s+-[a-z]*e'
+    mode: required
+    message: "script does not enable 'set -e'"
+
+  - id: shell/no-sudo
+    type: regex
+    description: "Scripts should not assume sudo is available."
+    severity: info
+    pattern: '^\s*sudo\b'
+    mode: forbidden
+    message: "avoid sudo inside scripts"
+
+  - id: shell/quote-variables
+    type: regex
+    description: "Unquoted variables undergo word splitting."
+    severity: warning
+    pattern: '\$[A-Za-z_][A-Za-z0-9_]*(?![A-Za-z0-9_]|"|\})'
+    mode: forbidden
+    message: "quote variable expansion to avoid word splitting"

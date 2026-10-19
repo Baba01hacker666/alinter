@@ -1,0 +1,40 @@
+name: css
+language: css
+description: "Checks for CSS stylesheets."
+detect:
+  extensions: [".css"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: css/no-important
+    type: regex
+    description: "Avoid !important, a symptom of specificity problems."
+    severity: warning
+    message: "avoid !important; fix specificity instead"
+    pattern: '!\s*important\b'
+  - id: css/no-id-selector
+    type: regex
+    description: "Prefer class selectors over ID selectors for styling."
+    severity: info
+    message: "prefer class selectors over IDs"
+    pattern: '(^|[\s,>+~])#[A-Za-z][\w-]*\s*[,{]'
+  - id: css/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: css/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: css/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: css/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

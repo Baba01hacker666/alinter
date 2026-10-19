@@ -1,0 +1,46 @@
+name: ruby
+language: ruby
+description: "Checks for Ruby source files."
+detect:
+  extensions: [".rb", ".rake", ".gemspec", ".ru"]
+  filenames: ["Rakefile", "Gemfile", "Guardfile", "Capfile", "Vagrantfile", "Podfile", "Fastfile"]
+  shebangs: ["ruby"]
+rules:
+  - id: ruby/no-binding-pry
+    type: regex
+    description: "A leftover binding.pry will halt production code."
+    severity: error
+    message: "remove binding.pry debugger"
+    pattern: '\bbinding\.pry\b'
+  - id: ruby/no-eval
+    type: regex
+    description: "Avoid dynamic code evaluation."
+    severity: warning
+    message: "avoid eval; dynamic code is hard to reason about"
+    pattern: '\beval\s*[\( ]'
+  - id: ruby/no-puts-debug
+    type: regex
+    description: "Prefer a logger over puts for diagnostics."
+    severity: info
+    message: "prefer a logger over puts"
+    pattern: '^\s*puts\b'
+  - id: ruby/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: ruby/max-line-length
+    type: max-line-length
+    description: "Match RuboCop's default line length."
+    severity: warning
+    length: 120
+  - id: ruby/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: ruby/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

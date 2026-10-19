@@ -1,0 +1,52 @@
+name: csharp
+language: csharp
+description: "Checks for C# source files."
+detect:
+  extensions: [".cs"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: csharp/no-console-write
+    type: regex
+    description: "Prefer an injected logger over direct console output."
+    severity: info
+    message: "use ILogger instead of Console.WriteLine"
+    pattern: 'Console\.(Write|WriteLine)\s*\('
+  - id: csharp/no-async-void
+    type: regex
+    description: "async void methods cannot be awaited and swallow exceptions."
+    severity: warning
+    message: "avoid async void except for event handlers"
+    pattern: '\basync\s+void\s+\w+\s*\('
+  - id: csharp/no-rethrow-ex
+    type: regex
+    description: "Rethrowing with `throw ex;` resets the stack trace."
+    severity: warning
+    message: "use `throw;` to preserve the stack trace"
+    pattern: '\bthrow\s+ex\s*;'
+  - id: csharp/no-region
+    type: regex
+    description: "Prefer well-named members over #region folding."
+    severity: info
+    message: "prefer well-named members over #region"
+    pattern: '^\s*#region\b'
+  - id: csharp/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: csharp/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: csharp/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: csharp/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

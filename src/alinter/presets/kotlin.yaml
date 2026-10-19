@@ -1,0 +1,45 @@
+name: kotlin
+language: kotlin
+description: "Checks for Kotlin source files."
+detect:
+  extensions: [".kt", ".kts"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: kotlin/no-println
+    type: regex
+    description: "Prefer a logger over println for diagnostics."
+    severity: info
+    message: "prefer a logger over println"
+    pattern: '\bprintln\s*\('
+  - id: kotlin/no-not-null-assert
+    type: regex
+    description: "The !! operator throws on null; handle nullability."
+    severity: warning
+    message: "avoid the !! operator; handle nullability safely"
+    pattern: '!!'
+  - id: kotlin/no-globalscope
+    type: regex
+    description: "GlobalScope leaks coroutines; prefer structured scopes."
+    severity: warning
+    message: "avoid GlobalScope; use structured concurrency"
+    pattern: '\bGlobalScope\b'
+  - id: kotlin/no-todo-function
+    type: regex
+    description: "TODO() always throws at runtime."
+    severity: warning
+    message: "TODO() throws at runtime; implement before shipping"
+    pattern: '\bTODO\s*\('
+  - id: kotlin/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: kotlin/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: kotlin/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

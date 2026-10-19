@@ -1,0 +1,40 @@
+name: xml
+language: xml
+description: "Checks for XML documents."
+detect:
+  extensions: [".xml", ".xsd", ".xsl", ".xslt", ".svg", ".plist", ".pom"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: xml/no-internal-dtd
+    type: regex
+    description: "Inline DTDs enable external entity (XXE) attacks."
+    severity: warning
+    message: "internal DTD subset; disable external entity expansion"
+    pattern: '<!DOCTYPE[^>]*\['
+  - id: xml/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: xml/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: xml/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: xml/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning
+  - id: xml/no-bom
+    type: encoding
+    description: "UTF-8 files should not carry a byte-order mark."
+    severity: warning
+    expect: "utf-8"
+    forbid_bom: true

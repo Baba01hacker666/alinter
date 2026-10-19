@@ -1,0 +1,46 @@
+name: html
+language: html
+description: "Checks for HTML documents."
+detect:
+  extensions: [".html", ".htm", ".xhtml"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: html/no-deprecated-elements
+    type: regex
+    description: "Flag obsolete presentational HTML elements."
+    severity: warning
+    message: "deprecated HTML element; use CSS instead"
+    pattern: '<\s*(center|font|marquee|blink)\b'
+  - id: html/no-inline-style
+    type: regex
+    description: "Prefer external stylesheets over inline styles."
+    severity: info
+    message: "avoid inline styles; use CSS classes"
+    pattern: '\bstyle\s*=\s*"'
+  - id: html/no-inline-script
+    type: regex
+    description: "Prefer external scripts to inline ones."
+    severity: info
+    message: "avoid inline scripts; prefer external files"
+    pattern: '<script(?![^>]*\bsrc\s*=)'
+  - id: html/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: html/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: html/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: html/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

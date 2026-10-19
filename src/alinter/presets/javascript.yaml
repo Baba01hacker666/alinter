@@ -1,0 +1,63 @@
+name: javascript
+language: javascript
+description: "Checks for JavaScript source files."
+detect:
+  extensions: [".js", ".jsx", ".mjs", ".cjs"]
+  filenames: [".eslintrc.js", "webpack.config.js"]
+  shebangs: ["node", "nodejs"]
+rules:
+  - id: javascript/no-debugger
+    type: regex
+    description: "Remove debugger statements before committing."
+    severity: error
+    pattern: '^\s*debugger\b'
+    mode: forbidden
+    message: "debugger statement found"
+
+  - id: javascript/no-console
+    type: regex
+    description: "Avoid console.log/debug in committed code."
+    severity: warning
+    pattern: '\bconsole\.(?:log|debug)\s*\('
+    mode: forbidden
+    message: "console.{match} left in code"
+
+  - id: javascript/no-var
+    type: regex
+    description: "Prefer let/const over var."
+    severity: warning
+    pattern: '^\s*var\s+[A-Za-z_$]'
+    mode: forbidden
+    message: "use let or const instead of var"
+
+  - id: javascript/no-eval
+    type: regex
+    description: "eval() executes arbitrary code and is a security risk."
+    severity: error
+    pattern: '\beval\s*\('
+    mode: forbidden
+    message: "eval() is unsafe"
+
+  - id: javascript/no-alert
+    type: regex
+    description: "Do not use blocking alert dialogs."
+    severity: warning
+    pattern: '\balert\s*\('
+    mode: forbidden
+    message: "alert() blocks the UI"
+
+  - id: javascript/eqeqeq
+    type: regex
+    description: "Use === / !== instead of == / !=."
+    severity: warning
+    pattern: '(?<![=!<>])==(?!=)|(?<![=!<>])!=(?!=)'
+    mode: forbidden
+    message: "use the strict comparison operator ({match})"
+
+  - id: javascript/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short."
+    severity: info
+    length: 120
+    ignore_urls: true
+    message: "line too long ({length} > {limit})"

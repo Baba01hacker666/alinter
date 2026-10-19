@@ -1,0 +1,76 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "alinter"
+version = "0.1.0"
+description = "A universal, config-driven linter: lint any language or format with declarative rules."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "baba01hacker" }]
+keywords = [
+  "linter",
+  "lint",
+  "static-analysis",
+  "code-quality",
+  "codestyle",
+  "universal",
+  "config-driven",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Quality Assurance",
+  "Topic :: Software Development :: Testing",
+  "Typing :: Typed",
+]
+dependencies = [
+  "PyYAML>=5.4",
+  "tomli>=1.1.0; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+gitignore = ["pathspec>=0.11"]
+dev = ["pytest>=7.0", "build>=1.0", "pyflakes>=3.0"]
+
+[project.scripts]
+alinter = "alinter.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/baba01hacker/alinter"
+Repository = "https://github.com/baba01hacker/alinter"
+Issues = "https://github.com/baba01hacker/alinter/issues"
+Changelog = "https://github.com/baba01hacker/alinter/blob/main/CHANGELOG.md"
+
+[project.entry-points."alinter.checks"]
+# Third-party plugins register custom check types here:
+#   my-check = "my_package.checks:MyCheck"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/alinter"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tests",
+  "/examples",
+  "/README.md",
+  "/LICENSE",
+  "/CHANGELOG.md",
+  "/pyproject.toml",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

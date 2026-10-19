@@ -1,0 +1,49 @@
+name: sql
+language: sql
+description: "Checks for SQL scripts."
+detect:
+  extensions: [".sql", ".ddl", ".dml"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: sql/no-select-star
+    type: regex
+    description: "Avoid SELECT *, which breaks when schemas change."
+    severity: warning
+    message: "avoid SELECT *; list columns explicitly"
+    pattern: '\bSELECT\s+\*'
+    flags: [IGNORECASE]
+  - id: sql/no-delete-without-where
+    type: regex
+    description: "A DELETE without WHERE removes every row."
+    severity: error
+    message: "DELETE without WHERE removes every row"
+    pattern: '\bDELETE\s+FROM\s+\w+\s*;'
+    flags: [IGNORECASE]
+  - id: sql/no-drop-table
+    type: regex
+    description: "Flag destructive DDL for review."
+    severity: info
+    message: "destructive DDL; review carefully"
+    pattern: '\bDROP\s+TABLE\b'
+    flags: [IGNORECASE]
+  - id: sql/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: sql/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: sql/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: sql/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

@@ -1,0 +1,51 @@
+name: rust
+language: rust
+description: "Checks for Rust source files."
+detect:
+  extensions: [".rs"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: rust/no-unwrap
+    type: regex
+    description: "Discourage unwrap(), which panics on error."
+    severity: warning
+    message: "unwrap() can panic; handle the error explicitly"
+    pattern: '\.unwrap\(\)'
+  - id: rust/no-expect
+    type: regex
+    description: "Discourage expect(), which panics on error."
+    severity: warning
+    message: "expect() can panic; handle the error explicitly"
+    pattern: '\.expect\s*\('
+  - id: rust/no-panic
+    type: regex
+    description: "Discourage explicit panics in library code."
+    severity: warning
+    message: "panic! found; return a Result instead"
+    pattern: '\bpanic!\s*\('
+  - id: rust/no-dbg
+    type: regex
+    description: "Flag leftover dbg! debugging macros."
+    severity: warning
+    message: "dbg! debug macro left in code"
+    pattern: '\bdbg!\s*\('
+  - id: rust/no-println
+    type: regex
+    description: "Prefer structured logging over println!."
+    severity: info
+    message: "prefer logging/tracing over println!"
+    pattern: '\bprintln!\s*\('
+  - id: rust/max-line-length
+    type: max-line-length
+    description: "Match rustfmt's default maximum width."
+    severity: warning
+    length: 100
+  - id: rust/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: rust/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

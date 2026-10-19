@@ -1,0 +1,26 @@
+# alinter lints itself. `alinter` in the project root should be clean.
+version: 1
+auto_detect: true
+
+exclude:
+  - "**/.venv/**"
+  - "**/build/**"
+  - "**/dist/**"
+
+ignore:
+  # alinter is a command line tool; printing to stdout is the whole point.
+  - "python/no-print"
+
+settings:
+  encoding: utf-8
+  use_gitignore: true
+
+rules:
+  # Keep the packaged presets and examples free of leftover markers.
+  - id: alinter/no-wip
+    type: regex
+    pattern: '\b(WIP|XXX)\b'
+    mode: forbidden
+    severity: info
+    files: ["**/*.py", "**/*.yaml", "**/*.md"]
+    message: "unresolved {match} marker"

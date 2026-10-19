@@ -1,0 +1,40 @@
+name: lua
+language: lua
+description: "Checks for Lua source files."
+detect:
+  extensions: [".lua"]
+  filenames: []
+  shebangs: ["lua", "luajit"]
+rules:
+  - id: lua/no-print
+    type: regex
+    description: "Prefer a logger over print for diagnostics."
+    severity: info
+    message: "prefer a logger over print"
+    pattern: '\bprint\s*\('
+  - id: lua/no-global-assignment
+    type: regex
+    description: "Assignments without local create global variables."
+    severity: warning
+    message: "missing local; avoid creating globals"
+    pattern: '^\s*(?!local\b)([A-Za-z_]\w*)\s*=[^=]'
+  - id: lua/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: lua/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: lua/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: lua/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

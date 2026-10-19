@@ -1,0 +1,34 @@
+name: ini
+language: ini
+description: "Checks for INI-style configuration files."
+detect:
+  extensions: [".ini", ".cfg", ".conf", ".properties", ".editorconfig", ".flake8", ".pylintrc"]
+  filenames: ["setup.cfg", "tox.ini", "pytest.ini", "mypy.ini", ".editorconfig"]
+  shebangs: []
+rules:
+  - id: ini/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: ini/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: ini/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: ini/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning
+  - id: ini/no-bom
+    type: encoding
+    description: "UTF-8 files should not carry a byte-order mark."
+    severity: warning
+    expect: "utf-8"
+    forbid_bom: true

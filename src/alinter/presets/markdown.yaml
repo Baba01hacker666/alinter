@@ -1,0 +1,33 @@
+name: markdown
+language: markdown
+description: "Checks for Markdown documents."
+detect:
+  extensions: [".md", ".markdown", ".mdx"]
+  filenames: ["README", "CHANGELOG", "CONTRIBUTING", "LICENSE.md"]
+  shebangs: []
+rules:
+  - id: markdown/single-h1
+    type: regex
+    description: "A document should have at most one top-level heading."
+    severity: warning
+    pattern: '^#\s+\S'
+    flags: [MULTILINE]
+    mode: count
+    max: 1
+    message: "found {count} top-level headings; expected at most {max}"
+
+  - id: markdown/no-tabs
+    type: no-tabs
+    description: "Prefer spaces over tabs for indentation."
+    severity: info
+    mode: leading
+    message: "tab used for indentation"
+
+  - id: markdown/max-line-length
+    type: max-line-length
+    description: "Very long lines are hard to review."
+    severity: info
+    length: 200
+    ignore_urls: true
+    ignore_regex: '^\s*\|'   # ignore table rows
+    message: "line too long ({length} > {limit})"

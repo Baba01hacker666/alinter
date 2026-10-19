@@ -1,0 +1,40 @@
+name: toml
+language: toml
+description: "Checks for TOML configuration files."
+detect:
+  extensions: [".toml"]
+  filenames: ["Pipfile", "Cargo.lock", "poetry.lock"]
+  shebangs: []
+rules:
+  - id: toml/valid-toml
+    type: structure
+    description: "Ensure the document parses as valid TOML."
+    severity: error
+    message: "invalid TOML syntax"
+    format: toml
+  - id: toml/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: toml/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: toml/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: toml/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning
+  - id: toml/no-bom
+    type: encoding
+    description: "UTF-8 files should not carry a byte-order mark."
+    severity: warning
+    expect: "utf-8"
+    forbid_bom: true

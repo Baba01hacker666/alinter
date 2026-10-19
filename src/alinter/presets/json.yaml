@@ -1,0 +1,23 @@
+name: json
+language: json
+description: "Checks for JSON documents."
+detect:
+  extensions: [".json"]
+  filenames: ["package.json", "tsconfig.json", "composer.json"]
+  shebangs: []
+rules:
+  - id: json/valid
+    type: structure
+    description: "The file must parse as JSON."
+    severity: error
+    format: json
+    message: "invalid JSON: {error}"
+
+  - id: json/no-comments
+    type: regex
+    description: "Strict JSON does not support comments."
+    severity: error
+    pattern: '^\s*(?://|/\*)'
+    flags: [MULTILINE]
+    mode: forbidden
+    message: "JSON does not allow comments"

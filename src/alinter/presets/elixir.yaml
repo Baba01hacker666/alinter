@@ -1,0 +1,46 @@
+name: elixir
+language: elixir
+description: "Checks for Elixir source and template files."
+detect:
+  extensions: [".ex", ".exs", ".eex", ".heex", ".leex"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: elixir/no-io-inspect
+    type: regex
+    description: "Prefer Logger over IO.inspect for diagnostics."
+    severity: info
+    message: "prefer Logger over IO.inspect"
+    pattern: '\bIO\.(inspect|puts)\b'
+  - id: elixir/no-string-to-atom
+    type: regex
+    description: "String.to_atom can exhaust the atom table."
+    severity: warning
+    message: "String.to_atom can exhaust the atom table; use to_existing_atom"
+    pattern: '\bString\.to_atom\s*\('
+  - id: elixir/no-iex-pry
+    type: regex
+    description: "A leftover IEx.pry will block execution."
+    severity: warning
+    message: "remove IEx.pry debugger"
+    pattern: '\bIEx\.pry\s*\('
+  - id: elixir/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: elixir/max-line-length
+    type: max-line-length
+    description: "Match the default mix format line length."
+    severity: warning
+    length: 98
+  - id: elixir/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: elixir/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

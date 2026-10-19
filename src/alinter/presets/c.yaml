@@ -1,0 +1,40 @@
+name: c
+language: c
+description: "Checks for C source and header files."
+detect:
+  extensions: [".c", ".h"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: c/no-unsafe-string-func
+    type: regex
+    description: "Forbid unbounded C string functions that overflow buffers."
+    severity: error
+    message: "unsafe C string function; use a bounded alternative"
+    pattern: '\b(strcpy|strcat|sprintf|gets|scanf)\s*\('
+  - id: c/no-malloc-cast
+    type: regex
+    description: "Casting the result of malloc is unnecessary and can hide errors."
+    severity: info
+    message: "do not cast the result of malloc in C"
+    pattern: '=\s*\(\s*[A-Za-z_][\w\s*]*\s*\)\s*malloc\s*\('
+  - id: c/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: c/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 100
+  - id: c/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: c/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

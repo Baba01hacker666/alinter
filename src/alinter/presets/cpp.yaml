@@ -1,0 +1,47 @@
+name: cpp
+language: cpp
+description: "Checks for C++ source and header files."
+detect:
+  extensions: [".cpp", ".cc", ".cxx", ".hpp", ".hh", ".hxx", ".cppm", ".h"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: cpp/no-using-namespace-std
+    type: regex
+    description: "Avoid pulling the entire std namespace into scope."
+    severity: warning
+    message: "avoid using namespace std; qualify names instead"
+    pattern: '^\s*using namespace std\s*;'
+  - id: cpp/no-null
+    type: literal
+    description: "Prefer nullptr over the NULL macro."
+    severity: info
+    message: "use nullptr instead of NULL"
+    value: "NULL"
+    whole_word: true
+  - id: cpp/no-raw-new
+    type: regex
+    description: "Prefer smart pointers over owning raw pointers."
+    severity: info
+    message: "prefer smart pointers over raw new"
+    pattern: '\bnew\s+[A-Za-z_][\w:]*\s*[\(\[]'
+  - id: cpp/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: cpp/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 100
+  - id: cpp/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: cpp/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

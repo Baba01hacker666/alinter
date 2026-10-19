@@ -1,0 +1,48 @@
+name: terraform
+language: terraform
+description: "Checks for Terraform configuration."
+detect:
+  extensions: [".tf", ".tfvars"]
+  filenames: []
+  shebangs: []
+rules:
+  - id: terraform/no-hardcoded-secrets
+    type: regex
+    description: "Secrets should not be committed in plain text."
+    severity: warning
+    message: "possible hardcoded secret; use variables or a secret manager"
+    pattern: '(password|passwd|secret|token|api_key|apikey|access_key|private_key)\s*=\s*"'
+    flags: [IGNORECASE]
+  - id: terraform/no-wide-open-cidr
+    type: regex
+    description: "0.0.0.0/0 exposes the resource to the internet."
+    severity: warning
+    message: "0.0.0.0/0 allows all traffic; restrict the CIDR"
+    pattern: '0\.0\.0\.0/0'
+  - id: terraform/no-public-acl
+    type: regex
+    description: "Public ACLs should be a deliberate decision."
+    severity: warning
+    message: "public ACL; confirm the resource must be public"
+    pattern: 'acl\s*=\s*"public'
+    flags: [IGNORECASE]
+  - id: terraform/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: terraform/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 120
+  - id: terraform/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: terraform/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

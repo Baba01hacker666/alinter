@@ -1,0 +1,46 @@
+name: r
+language: r
+description: "Checks for R source files."
+detect:
+  extensions: [".r", ".rmd", ".rnw"]
+  filenames: ["Rprofile", ".Rprofile"]
+  shebangs: ["Rscript"]
+rules:
+  - id: r/no-setwd
+    type: regex
+    description: "Changing the working directory breaks reproducibility."
+    severity: warning
+    message: "avoid setwd(); it breaks reproducibility"
+    pattern: '\bsetwd\s*\('
+  - id: r/no-rm-list
+    type: regex
+    description: "Clearing the whole workspace hides dependencies."
+    severity: warning
+    message: "avoid rm(list = ls())"
+    pattern: '\brm\s*\(\s*list\s*=\s*ls\s*\('
+  - id: r/no-attach
+    type: regex
+    description: "attach() pollutes the search path."
+    severity: warning
+    message: "avoid attach(); use with() or explicit references"
+    pattern: '\battach\s*\('
+  - id: r/no-todo
+    type: literal
+    description: "Flag unfinished TODO markers."
+    severity: info
+    message: "unfinished TODO left in code"
+    value: "TODO"
+    whole_word: true
+  - id: r/max-line-length
+    type: max-line-length
+    description: "Keep lines reasonably short for readability."
+    severity: warning
+    length: 100
+  - id: r/no-trailing-whitespace
+    type: no-trailing-whitespace
+    description: "Forbid trailing whitespace."
+    severity: warning
+  - id: r/final-newline
+    type: final-newline
+    description: "Require a single trailing newline at end of file."
+    severity: warning

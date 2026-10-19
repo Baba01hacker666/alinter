@@ -1,0 +1,21 @@
+name: yaml
+language: yaml
+description: "Checks for YAML documents."
+detect:
+  extensions: [".yaml", ".yml"]
+  filenames: [".yamllint", ".travis.yml"]
+  shebangs: []
+rules:
+  - id: yaml/valid
+    type: structure
+    description: "The file must parse as YAML."
+    severity: error
+    format: yaml
+    message: "invalid YAML: {error}"
+
+  - id: yaml/no-tabs
+    type: no-tabs
+    description: "Tabs cannot be used for YAML indentation."
+    severity: warning
+    mode: leading
+    message: "tab used for indentation in YAML"

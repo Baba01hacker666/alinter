@@ -1,0 +1,13 @@
+# Use alinter as a pre-commit hook:
+#
+#   - repo: https://github.com/baba01hacker/alinter
+#     rev: v0.1.0
+#     hooks:
+#       - id: alinter
+- id: alinter
+  name: alinter
+  description: Universal, config-driven linter
+  entry: alinter check
+  language: python
+  pass_filenames: true
+  types: [text]

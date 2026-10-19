@@ -1,0 +1,44 @@
+# Example alinter configuration.
+#
+# Copy this next to your project as `.alinter.yaml`, or run `alinter init`.
+version: 1
+auto_detect: true
+
+exclude:
+  - "**/vendor/**"
+  - "**/generated/**"
+
+ignore:
+  - "generic/final-newline"
+
+settings:
+  encoding: utf-8
+  use_gitignore: true
+
+rules:
+  # A project-specific rule: no leftover TODO markers.
+  - id: example/no-todo
+    type: regex
+    pattern: '\b(TODO|FIXME)\b'
+    mode: forbidden
+    severity: info
+    message: "unresolved {match} marker"
+    files: ["**/*"]
+
+  # Enforce a naming convention for shell scripts.
+  - id: example/shell-naming
+    type: filename
+    pattern: '^[a-z0-9_]+\.sh$'
+    mode: required
+    severity: warning
+    languages: [shell]
+    message: "shell scripts must be lower_snake_case.sh"
+
+  # Require a VERSION key in package manifests.
+  - id: example/package-version
+    type: structure
+    format: json
+    require_keys: [version]
+    severity: warning
+    files: ["**/package.json"]
+    message: "package.json is missing a 'version' key"
