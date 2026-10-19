@@ -16,11 +16,12 @@ settings:
   use_gitignore: true
 
 rules:
-  # Keep the packaged presets and examples free of leftover markers.
+  # Keep the packaged presets and examples free of leftover markers. The rule is
+  # deliberately absent from its own pattern's reach (config/docs are excluded).
   - id: alinter/no-wip
     type: regex
     pattern: '\b(WIP|XXX)\b'
     mode: forbidden
     severity: info
-    files: ["**/*.py", "**/*.yaml", "**/*.md"]
+    files: ["src/alinter/presets/**", "examples/**", ".github/**"]
     message: "unresolved {match} marker"

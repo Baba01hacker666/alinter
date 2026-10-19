@@ -3,6 +3,30 @@
 All notable changes to **alinter** are documented here.
 This project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **Documentation**: a full manual under [`docs/`](docs/README.md) (how it
+  works, configuration, rules, checks, presets, suppressions, plugins,
+  reporters, CLI, Python API, development, FAQ), plus [`AGENTS.md`](AGENTS.md),
+  [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`SECURITY.md`](SECURITY.md).
+- `ignore_fences` parameter for the `regex` and `literal` checks: matches
+  inside fenced code blocks are skipped. The `markdown` preset now uses it so
+  `# comment` lines inside code fences are no longer counted as headings.
+
+### Changed
+
+- `.gitignore` discovery prefers `pathspec.GitIgnoreSpec` on newer `pathspec`,
+  avoiding a deprecation warning while still supporting older releases.
+- CI now runs the linter over the whole repository (docs included), enforces a
+  coverage floor, and checks the built distributions with `twine`.
+
+### Tooling
+
+- `pytest-cov` added to the `dev` extra with `[tool.coverage]` configuration
+  (`fail_under = 93`); the suite is at ~96% line coverage.
+
 ## [0.1.0] - 2026-10-19
 
 ### Added

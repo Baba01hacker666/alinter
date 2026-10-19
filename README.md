@@ -74,6 +74,30 @@ alinter --format sarif > alinter.sarif
 4. **Run** each rule's check and collect violations.
 5. **Report** (and optionally **fix**) the results.
 
+See [`docs/how-it-works.md`](docs/how-it-works.md) for the full pipeline.
+
+## Documentation
+
+The full manual lives in [`docs/`](docs/README.md):
+
+| Document | What it covers |
+| --- | --- |
+| [how-it-works.md](docs/how-it-works.md) | The linting pipeline and module layout |
+| [configuration.md](docs/configuration.md) | Every config key, discovery and merge rules |
+| [rules.md](docs/rules.md) | Anatomy of a rule, scopes, severities, overrides |
+| [checks.md](docs/checks.md) | Every built-in check type and its parameters |
+| [presets.md](docs/presets.md) | Detection and adding a language |
+| [suppressions.md](docs/suppressions.md) | Inline `alinter:` comments |
+| [plugins.md](docs/plugins.md) | Shipping custom check types |
+| [reporters.md](docs/reporters.md) | Output formats |
+| [cli.md](docs/cli.md) | Every command and flag |
+| [python-api.md](docs/python-api.md) | Using alinter from Python |
+| [development.md](docs/development.md) | Setup, quality gates, CI, releasing |
+| [faq.md](docs/faq.md) | Common questions and troubleshooting |
+
+Contributors (and AI agents) should also read [`AGENTS.md`](AGENTS.md),
+[`CONTRIBUTING.md`](CONTRIBUTING.md) and [`SECURITY.md`](SECURITY.md).
+
 ## Configuration
 
 alinter looks for a config file named `.alinter.yaml`, `alinter.yaml`,
@@ -149,6 +173,8 @@ Run `alinter types` for the live list.
 | `command` | run an external command per file | `command`, `expect_exit` |
 
 `mode` is `forbidden` (default), `required`, or `count` (with `min`/`max`).
+`regex`/`literal` also accept `whole_word`, `per_line` and `ignore_fences`
+(skip matches inside fenced code blocks).
 
 ### Message templates
 
@@ -272,15 +298,24 @@ pip install -e ".[dev]"
 Quality gates (also run in CI):
 
 ```bash
-ruff check src tests examples          # formatting, imports, bugbear, pyupgrade
-bandit -c pyproject.toml -r src/alinter  # security (flake8-bandit rules)
-pyflakes src/alinter tests examples    # undefined names / unused imports
-alinter check src tests examples       # the linter lints itself
-python -m pytest -q                    # test suite
+ruff check src tests examples            # formatting, imports, bugbear, pyupgrade
+bandit -c pyproject.toml -r src/alinter  # security (bandit rules)
+pyflakes src/alinter tests examples      # undefined names / unused imports
+alinter check .                          # the linter lints the whole repo, docs included
+python -m pytest -q                      # test suite
 ```
 
-Ruff and bandit are configured in `pyproject.toml`. A `.pre-commit-config.yaml`
-is provided; run `pre-commit install` to enable the hooks locally.
+Measure coverage (enforced at 93% in CI):
+
+```bash
+python -m pytest --cov=alinter --cov-report=term-missing
+```
+
+Ruff and bandit are configured in `pyproject.toml`; alinter's self-lint is
+driven by the repository's own [`.alinter.yaml`](.alinter.yaml). A
+`.pre-commit-config.yaml` is provided; run `pre-commit install` to enable the
+hooks locally. The development guide is
+[`docs/development.md`](docs/development.md).
 
 ## License
 
