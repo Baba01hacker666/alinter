@@ -27,7 +27,7 @@ Pythons).
 ```yaml
 # .pre-commit-config.yaml
 repos:
-  - repo: https://github.com/baba01hacker/alinter
+  - repo: https://github.com/Baba01hacker666/alinter
     rev: v0.1.0
     hooks:
       - id: alinter

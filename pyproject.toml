@@ -48,10 +48,10 @@ dev = ["pytest>=7.0", "build>=1.0", "pyflakes>=3.0"]
 alinter = "alinter.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/baba01hacker/alinter"
-Repository = "https://github.com/baba01hacker/alinter"
-Issues = "https://github.com/baba01hacker/alinter/issues"
-Changelog = "https://github.com/baba01hacker/alinter/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Baba01hacker666/alinter"
+Repository = "https://github.com/Baba01hacker666/alinter"
+Issues = "https://github.com/Baba01hacker666/alinter/issues"
+Changelog = "https://github.com/Baba01hacker666/alinter/blob/main/CHANGELOG.md"
 
 [project.entry-points."alinter.checks"]
 # Third-party plugins register custom check types here:

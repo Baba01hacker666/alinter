@@ -21,7 +21,7 @@ COMMANDS = ("check", "init", "presets", "rules", "explain", "langs", "validate",
 
 INIT_TEMPLATE = """\
 # alinter configuration
-# Docs: https://github.com/baba01hacker/alinter
+# Docs: https://github.com/Baba01hacker666/alinter
 version: 1
 
 # Automatically apply language/format presets based on file type.

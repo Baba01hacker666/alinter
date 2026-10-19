@@ -80,7 +80,7 @@ class SarifReporter(Reporter):
                     "tool": {
                         "driver": {
                             "name": "alinter",
-                            "informationUri": "https://github.com/baba01hacker/alinter",
+                            "informationUri": "https://github.com/Baba01hacker666/alinter",
                             "version": __version__,
                             "rules": list(rule_map.values()),
                         }
